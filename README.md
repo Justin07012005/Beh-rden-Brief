@@ -1,60 +1,78 @@
-# webklar-preview-template
+# BehördenKlar
 
-Vorlage fuer Kunden-Websites mit automatischer Preview unter `*.project.webklar.com`.
+Behördenbriefe scannen, in einfacher Sprache verstehen, übersetzen und direkt beantworten.
 
-## Preview aktivieren
+## Funktionen
 
-Dieses Repo enthaelt [`.webklar-preview.json`](.webklar-preview.json). Beim Push auf den konfigurierten Branch startet der Deploy:
+- 📷 **Brief scannen** — Foto, Galerie-Bild oder PDF
+- 🧠 **KI-Analyse** (Claude Vision) — ein Aufruf liefert strukturiert:
+  - „Was will das Amt von mir?" in 2-3 Sätzen (A2-Niveau)
+  - Ausführliche Erklärung in einfacher Sprache
+  - Fachbegriffe mit Erklärung
+  - Fristen & Termine (exakte Daten)
+  - Checkliste („Diese Unterlagen mitbringen…")
+- 🚦 **Dringlichkeits-Ampel** — lokal berechnet: 🔴 < 7 Tage · 🟡 7–21 Tage · 🟢 keine Frist
+- 🌐 **Übersetzung** in 9 Sprachen (Türkisch, Arabisch, Englisch, Russisch, Ukrainisch, Französisch, Farsi, Rumänisch, Polnisch) — on demand, gecacht
+- ✍️ **Antwort-Generator** — Vorlagen (Terminbestätigung, Verschiebung, Widerspruch, Unterlagen nachreichen, Rückfrage), frei editierbar, PDF-Export
+- 🗓️ **Kalender-Export** für Termine, ⏰ **lokale Erinnerungen** 3 + 1 Tage vor Fristen
+- 📖 **Behörden-Glossar** (offline), 🔊 **Vorlese-Funktion**, 📡 **Offline-Hinweis**
+- 🔒 **Datenschutz**: Einwilligung vor erstem Scan, alle Daten nur lokal, „Alles löschen"-Funktion
 
-- URL: `https://project.webklar.com/webhook/gitea`
-- Vorschau: `https://<subdomain>.project.webklar.com`
+## Starten (Entwicklung)
 
-## Konfiguration (`.webklar-preview.json`)
-
-| Feld | Beschreibung |
-|------|----------------|
-| `enabled` | `true` = Preview-Deploy aktiv |
-| `type` | `static` (Dateien direkt) oder `node_build` (npm build) |
-| `branch` | Branch fuer Deploy, z. B. `main` |
-| `displayName` | Anzeigename im Kundenportal |
-| `subdomain` | Optional; Default = Repo-Name |
-
-**Keine Passwoerter** in dieser Datei.
-
-### Beispiel fuer statische Seite
-
-```json
-{
-  "enabled": true,
-  "type": "static",
-  "branch": "main",
-  "displayName": "Friseur Mueller",
-  "subdomain": "friseur-mueller"
-}
+```bash
+npm install
+npx expo start
 ```
 
-### Beispiel fuer Vite/React (Build)
+App in Expo Go (oder Development Build) öffnen, dann:
 
-```json
-{
-  "enabled": true,
-  "type": "node_build",
-  "branch": "main",
-  "displayName": "Restaurant Demo",
-  "subdomain": "restaurant-demo"
-}
+1. **Einstellungen** → Anthropic-API-Schlüssel eintragen (von console.anthropic.com).
+   Der Schlüssel landet verschlüsselt im Secure Store des Geräts.
+2. **Brief scannen** → Einwilligung bestätigen → Foto machen.
+
+> Hinweis: Erinnerungen (Benachrichtigungen) sind in Expo Go auf Android
+> eingeschränkt — im Development Build (`npx expo run:android`) voll verfügbar.
+
+## Produktion: Backend-Proxy statt API-Key in der App
+
+Für Endkunden darf kein API-Key in der App stecken. Vorbereitet in
+`src/services/claudeClient.ts`:
+
+```ts
+const PROXY_URL: string | null = null; // -> eigene Server-URL eintragen
 ```
 
-## Neues Projekt aus dieser Vorlage
+Der Proxy (z. B. Cloudflare Worker / Vercel Function) muss nur:
+1. den Request-Body unverändert an `https://api.anthropic.com/v1/messages` weiterleiten,
+2. dabei serverseitig `x-api-key` + `anthropic-version: 2023-06-01` setzen,
+3. die Antwort unverändert zurückgeben.
 
-1. In Gitea: **Use this template** / Repository aus Template erstellen
-2. `displayName` und `subdomain` in `.webklar-preview.json` anpassen
-3. Website-Inhalt ersetzen (`index.html` oder eigenes Frontend)
-4. Push auf `main` � Webhook deployt automatisch
-5. Im Admin-Portal (`project.webklar.com`) Kunde dem Projekt zuweisen
+Abrechnung der Endkunden dann per Abo/In-App-Kauf.
 
-## Gitea-Webhook (einmalig pro Org/Repo)
+## Architektur
 
-- **URL:** `https://project.webklar.com/webhook/gitea`
-- **Secret:** `GITEA_WEBHOOK_TOKEN` (Server-`.env`)
-- **Events:** Push
+```
+src/
+  services/
+    claudeClient.ts   – Low-Level Claude-API-Client (Dev-Direkt / Prod-Proxy)
+    analyse.ts        – Vision-Aufruf + JSON-Schema (Structured Output)
+    uebersetzung.ts   – Übersetzung pro Sprache, gecacht
+    antwort.ts        – Antwort-Entwurf-Generator
+    storage.ts        – SecureStore (Key) + AsyncStorage (Archiv, Consent)
+    erinnerungen.ts   – lokale Benachrichtigungen vor Fristen
+    kalender.ts       – Termin-Export
+  utils/ampel.ts      – Dringlichkeits-Ampel (deterministisch, lokal)
+  store/useAppStore.ts – Zustand-Store, synchron zu AsyncStorage
+  screens/            – Home, Consent, Scan, Analyse, Antwort, Glossar, Einstellungen
+  components/         – GrossButton, Ampel (barrierefrei: 56px-Targets, große Schrift)
+  data/glossar.ts     – Offline-Glossar
+```
+
+Die KI-Antworten sind über **Structured Output** (JSON-Schema) garantiert
+valide — kein fragiles Text-Parsing.
+
+## Wichtig
+
+Diese App ersetzt keine Rechtsberatung. Bei rechtlich relevanten Antworten
+(z. B. Widerspruch) Beratungsstelle oder Anwalt hinzuziehen.

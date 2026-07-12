@@ -1,0 +1,44 @@
+{
+  "expo": {
+    "name": "BehoerdenKlar",
+    "slug": "BehoerdenKlar",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#E6F4FE",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-secure-store",
+      "expo-sharing",
+      [
+        "expo-image-picker",
+        {
+          "cameraPermission": "BehördenKlar braucht die Kamera, um Ihre Behördenbriefe zu fotografieren.",
+          "photosPermission": "BehördenKlar braucht Zugriff auf Ihre Fotos, um gespeicherte Brief-Fotos auszuwählen."
+        }
+      ],
+      [
+        "expo-calendar",
+        {
+          "calendarPermission": "BehördenKlar trägt auf Wunsch Behörden-Termine in Ihren Kalender ein."
+        }
+      ],
+      "expo-notifications",
+      "expo-status-bar"
+    ]
+  }
+}
