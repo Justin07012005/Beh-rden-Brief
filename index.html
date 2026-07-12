@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Webklar Preview Vorlage</title>
+  <style>
+    :root { --bg: #0f1419; --card: #1a2332; --text: #e7ecf3; --accent: #3b82f6; }
+    * { box-sizing: border-box; }
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+    main {
+      max-width: 32rem;
+      background: var(--card);
+      border-radius: 12px;
+      padding: 2rem;
+      text-align: center;
+    }
+    h1 { color: var(--accent); margin-top: 0; }
+    p { line-height: 1.6; opacity: 0.9; }
+    code { background: #0f172a; padding: 0.15rem 0.4rem; border-radius: 4px; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Webklar Preview Vorlage</h1>
+    <p>Dieses Repository ist als Preview-Projekt konfiguriert.</p>
+    <p>Nach dem Push wird die Vorschau unter<br>
+      <code>webklar-preview-template.project.webklar.com</code><br>
+      bereitgestellt (Login über <code>project.webklar.com</code>).</p>
+    <p>Passe <code>.webklar-preview.json</code> und diese Seite fuer dein Kundenprojekt an.</p>
+  </main>
+</body>
+</html>
