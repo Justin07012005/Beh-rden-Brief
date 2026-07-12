@@ -3,5 +3,8 @@
   "type": "static",
   "branch": "main",
   "displayName": "Behörde Brief",
-  "templateName": "webklar-preview-template"
+  "templateName": "webklar-preview-template",
+  "projectType": "project",
+  "public": false,
+  "template": false
 }
