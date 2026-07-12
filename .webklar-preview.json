@@ -2,8 +2,6 @@
   "enabled": false,
   "type": "static",
   "branch": "main",
-  "displayName": "webklar-preview-template",
-  "templateName": "webklar-preview-template",
-  "projectType": "project",
-  "public": false
+  "displayName": "Behörde Brief",
+  "templateName": "webklar-preview-template"
 }
