@@ -1,0 +1,14 @@
+name = "behoerdenklar-proxy"
+main = "src/index.ts"
+compatibility_date = "2026-07-01"
+
+# Erlaubte Anfragen pro Tag: pro Gerät (normale Nutzung) und pro IP-Adresse
+# (dämmt Angreifer ein, die Geräte-IDs fälschen; höher, weil sich viele
+# Nutzer eine IP teilen können)
+[vars]
+TAGES_LIMIT = "20"
+TAGES_LIMIT_IP = "100"
+
+[[kv_namespaces]]
+binding = "RATE_LIMIT"
+id = "7577adef8ceb4ed6bfaeef81a1d496af"

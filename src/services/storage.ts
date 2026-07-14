@@ -14,6 +14,16 @@ import { BriefEintrag } from '../types';
 const KEY_API = 'anthropic_api_key';
 const KEY_BRIEFE = 'behoerdenklar_briefe';
 const KEY_CONSENT = 'behoerdenklar_consent';
+const KEY_GERAETE_ID = 'behoerdenklar_geraete_id';
+const KEY_SCAN_ANZAHL = 'behoerdenklar_scan_anzahl';
+
+/**
+ * Freemium: so viele Brief-Analysen sind kostenlos. Danach braucht es das
+ * Abo (kommt mit dem IAP-Einbau). Der Zähler liegt lokal — das ist bewusst
+ * "weich" (Neuinstallation setzt ihn zurück); die harte Grenze ist das
+ * Tageslimit des Backend-Proxys. Echte Abo-Prüfung folgt serverseitig.
+ */
+export const GRATIS_ANALYSEN = 3;
 
 // ---- API-Key (sensibel -> SecureStore) ----
 
@@ -27,6 +37,42 @@ export async function speichereApiKey(key: string): Promise<void> {
   } else {
     await SecureStore.deleteItemAsync(KEY_API);
   }
+}
+
+// ---- Geräte-ID (anonym, nur fürs Tageslimit des Backend-Proxys) ----
+
+/**
+ * Liefert eine zufällige, anonyme Geräte-ID (wird beim ersten Aufruf erzeugt).
+ * Sie enthält keine Gerätedaten und dient dem Proxy ausschließlich dazu,
+ * das Anfrage-Tageslimit pro Installation durchzusetzen.
+ */
+export async function holeGeraeteId(): Promise<string> {
+  let id = await AsyncStorage.getItem(KEY_GERAETE_ID);
+  if (!id) {
+    // Math.random reicht hier: die ID ist kein Geheimnis, nur ein Zähl-Schlüssel
+    id =
+      'g_' +
+      Array.from({ length: 24 }, () =>
+        Math.floor(Math.random() * 36).toString(36)
+      ).join('');
+    await AsyncStorage.setItem(KEY_GERAETE_ID, id);
+  }
+  return id;
+}
+
+// ---- Freemium-Zähler ----
+
+/** Wie viele Brief-Analysen wurden auf diesem Gerät schon durchgeführt? */
+export async function holeAnzahlAnalysen(): Promise<number> {
+  const roh = await AsyncStorage.getItem(KEY_SCAN_ANZAHL);
+  const anzahl = roh ? parseInt(roh, 10) : 0;
+  return Number.isFinite(anzahl) ? anzahl : 0;
+}
+
+/** Nach jeder erfolgreichen Analyse aufrufen. */
+export async function zaehleAnalyse(): Promise<void> {
+  const bisher = await holeAnzahlAnalysen();
+  await AsyncStorage.setItem(KEY_SCAN_ANZAHL, String(bisher + 1));
 }
 
 // ---- Einwilligung (Datenschutz-Consent) ----
@@ -59,6 +105,14 @@ export async function speichereBriefe(briefe: BriefEintrag[]): Promise<void> {
 // ---- Alles löschen (Datenschutz-Anforderung) ----
 
 export async function loescheAlleDaten(): Promise<void> {
-  await AsyncStorage.multiRemove([KEY_BRIEFE, KEY_CONSENT]);
+  // "Alle Daten löschen" heißt wirklich alle — auch Zähler und Geräte-ID.
+  // Dass damit das Gratis-Kontingent zurücksetzbar ist, nehmen wir in Kauf
+  // (Neuinstallation könnte das ohnehin); der Proxy limitiert weiterhin.
+  await AsyncStorage.multiRemove([
+    KEY_BRIEFE,
+    KEY_CONSENT,
+    KEY_GERAETE_ID,
+    KEY_SCAN_ANZAHL,
+  ]);
   await SecureStore.deleteItemAsync(KEY_API);
 }

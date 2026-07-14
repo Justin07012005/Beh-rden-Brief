@@ -1,6 +1,7 @@
 /**
- * Einstellungen: API-Schlüssel (Dev-Modus), Datenschutz-Info,
- * "Alle Daten löschen".
+ * Einstellungen: Datenschutz-Info und "Alle Daten löschen".
+ * Das API-Schlüssel-Feld erscheint nur im Entwickler-Modus (ohne Proxy) —
+ * im Produktionsmodus läuft der KI-Zugang über den Backend-Proxy.
  */
 import React, { useEffect, useState } from 'react';
 import { Alert, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
@@ -8,6 +9,7 @@ import * as Notifications from 'expo-notifications';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../types';
 import { holeApiKey, speichereApiKey, loescheAlleDaten } from '../services/storage';
+import { NUTZT_PROXY } from '../services/claudeClient';
 import { useAppStore } from '../store/useAppStore';
 import { GrossButton } from '../components/GrossButton';
 import { farben, schrift, abstand } from '../theme';
@@ -35,7 +37,7 @@ export function EinstellungenScreen({ navigation }: Props) {
   const allesLoeschen = () => {
     Alert.alert(
       'Wirklich ALLE Daten löschen?',
-      'Alle gescannten Briefe, Übersetzungen, Entwürfe, der API-Schlüssel und die Einwilligung werden dauerhaft gelöscht. Das kann nicht rückgängig gemacht werden.',
+      'Alle gescannten Briefe, Übersetzungen, Entwürfe und die Einwilligung werden dauerhaft gelöscht. Das kann nicht rückgängig gemacht werden.',
       [
         { text: 'Abbrechen', style: 'cancel' },
         {
@@ -57,42 +59,47 @@ export function EinstellungenScreen({ navigation }: Props) {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={{ padding: abstand.m }}>
-      <Text style={styles.abschnittTitel}>KI-Zugang (API-Schlüssel)</Text>
-      <Text style={styles.text}>
-        Status:{' '}
-        <Text style={{ fontWeight: '700', color: keyVorhanden ? farben.ampelGruen : farben.fehler }}>
-          {keyVorhanden ? 'Schlüssel hinterlegt ✓' : 'Kein Schlüssel hinterlegt'}
-        </Text>
-      </Text>
-      <Text style={styles.hinweis}>
-        Der Schlüssel wird verschlüsselt auf dem Gerät gespeichert (Secure Store)
-        und nur für die Brief-Analyse verwendet. Einen Schlüssel erhalten Sie
-        unter console.anthropic.com.
-      </Text>
-      <TextInput
-        style={styles.eingabe}
-        placeholder="sk-ant-…"
-        placeholderTextColor={farben.textSekundaer}
-        value={apiKey}
-        onChangeText={setApiKey}
-        secureTextEntry
-        autoCapitalize="none"
-        autoCorrect={false}
-        accessibilityLabel="API-Schlüssel eingeben"
-      />
-      <GrossButton
-        titel={gespeichert ? 'Gespeichert ✓' : 'Schlüssel speichern'}
-        onPress={speichern}
-        deaktiviert={!apiKey.trim()}
-      />
+      {!NUTZT_PROXY && (
+        <>
+          <Text style={styles.abschnittTitel}>KI-Zugang (API-Schlüssel)</Text>
+          <Text style={styles.text}>
+            Status:{' '}
+            <Text style={{ fontWeight: '700', color: keyVorhanden ? farben.ampelGruen : farben.fehler }}>
+              {keyVorhanden ? 'Schlüssel hinterlegt ✓' : 'Kein Schlüssel hinterlegt'}
+            </Text>
+          </Text>
+          <Text style={styles.hinweis}>
+            Der Schlüssel wird verschlüsselt auf dem Gerät gespeichert (Secure Store)
+            und nur für die Brief-Analyse verwendet. Einen Schlüssel erhalten Sie
+            unter console.anthropic.com.
+          </Text>
+          <TextInput
+            style={styles.eingabe}
+            placeholder="sk-ant-…"
+            placeholderTextColor={farben.textSekundaer}
+            value={apiKey}
+            onChangeText={setApiKey}
+            secureTextEntry
+            autoCapitalize="none"
+            autoCorrect={false}
+            accessibilityLabel="API-Schlüssel eingeben"
+          />
+          <GrossButton
+            titel={gespeichert ? 'Gespeichert ✓' : 'Schlüssel speichern'}
+            onPress={speichern}
+            deaktiviert={!apiKey.trim()}
+          />
 
-      <View style={styles.trenner} />
+          <View style={styles.trenner} />
+        </>
+      )}
 
       <Text style={styles.abschnittTitel}>Datenschutz</Text>
       <View style={styles.karte}>
         <Text style={styles.text}>
-          • Brieffotos werden nur zur Analyse an Anthropic gesendet und dort
-          nicht dauerhaft gespeichert.{'\n\n'}
+          • Brieffotos werden nur zur Analyse an den KI-Dienst Anthropic (USA)
+          gesendet und dort nach spätestens 30 Tagen gelöscht. Sie werden nicht
+          zum Training der KI verwendet.{'\n\n'}
           • Alle Ergebnisse liegen ausschließlich auf Ihrem Gerät.{'\n\n'}
           • Diese App ersetzt keine Rechtsberatung.
         </Text>

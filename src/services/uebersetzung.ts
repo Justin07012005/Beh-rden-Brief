@@ -4,7 +4,7 @@
  * Archiv gecacht (siehe store), damit kein Aufruf doppelt läuft.
  */
 import { BriefAnalyse, Sprache, Uebersetzung } from '../types';
-import { claudeJsonAufruf } from './claudeClient';
+import { claudeJsonAufruf, MODELL_EINFACH } from './claudeClient';
 
 const UEBERSETZUNG_SCHEMA = {
   type: 'object',
@@ -36,6 +36,8 @@ export async function uebersetzeAnalyse(
   sprache: Sprache
 ): Promise<Uebersetzung> {
   return claudeJsonAufruf<Uebersetzung>({
+    modell: MODELL_EINFACH,
+    maxTokens: 6000,
     system: `Du übersetzt Erklärungen deutscher Behördenbriefe in andere Sprachen. Übersetze in einfache, klare Sprache (Niveau A2/B1 der Zielsprache). Deutsche Fachbegriffe (Feld "begriff") NICHT übersetzen — sie stehen so im Original-Brief und der Nutzer muss sie wiedererkennen. Nur die Erklärungen übersetzen.`,
     schema: UEBERSETZUNG_SCHEMA,
     messages: [

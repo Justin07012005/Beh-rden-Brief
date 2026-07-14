@@ -36,19 +36,19 @@ App in Expo Go (oder Development Build) öffnen, dann:
 
 ## Produktion: Backend-Proxy statt API-Key in der App
 
-Für Endkunden darf kein API-Key in der App stecken. Vorbereitet in
-`src/services/claudeClient.ts`:
+Für Endkunden darf kein API-Key in der App stecken. Der fertige Proxy
+(Cloudflare Worker) liegt in [`proxy/`](proxy/README.md) — er hält den Key
+serverseitig, erlaubt nur die App-Modelle, deckelt `max_tokens` und setzt ein
+Tageslimit pro Gerät durch.
+
+Nach dem Deployment (Anleitung: `proxy/README.md`) in
+`src/services/claudeClient.ts` die Worker-URL eintragen:
 
 ```ts
-const PROXY_URL: string | null = null; // -> eigene Server-URL eintragen
+const PROXY_URL: string | null = 'https://behoerdenklar-proxy.<account>.workers.dev';
 ```
 
-Der Proxy (z. B. Cloudflare Worker / Vercel Function) muss nur:
-1. den Request-Body unverändert an `https://api.anthropic.com/v1/messages` weiterleiten,
-2. dabei serverseitig `x-api-key` + `anthropic-version: 2023-06-01` setzen,
-3. die Antwort unverändert zurückgeben.
-
-Abrechnung der Endkunden dann per Abo/In-App-Kauf.
+Abrechnung der Endkunden dann per Abo/In-App-Kauf (Abo-Prüfung im Proxy ergänzen).
 
 ## Architektur
 

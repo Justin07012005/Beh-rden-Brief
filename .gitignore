@@ -33,6 +33,10 @@ yarn-error.*
 # local env files
 .env*.local
 
+# Cloudflare Worker (Proxy)
+.wrangler/
+.dev.vars
+
 # typescript
 *.tsbuildinfo
 

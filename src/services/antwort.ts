@@ -4,7 +4,7 @@
  * Entwurf danach frei bearbeiten und als PDF exportieren.
  */
 import { AntwortTyp, ANTWORT_TYP_LABEL, BriefAnalyse } from '../types';
-import { claudeJsonAufruf } from './claudeClient';
+import { claudeJsonAufruf, MODELL_EINFACH } from './claudeClient';
 
 const ANTWORT_SCHEMA = {
   type: 'object',
@@ -36,6 +36,8 @@ export async function generiereAntwort(
   hinweise: string
 ): Promise<AntwortEntwurf> {
   return claudeJsonAufruf<AntwortEntwurf>({
+    modell: MODELL_EINFACH,
+    maxTokens: 4000,
     system: `Du schreibst formelle, höfliche Antwortbriefe an deutsche Behörden im Namen von Privatpersonen. Regeln:
 - Korrektes, formelles Deutsch (der Empfänger ist eine Behörde — hier KEINE einfache Sprache).
 - Kurz und präzise, keine Floskeln über das Nötige hinaus.

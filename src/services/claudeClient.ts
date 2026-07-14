@@ -13,16 +13,32 @@
  * deshalb hier bewusst rohes fetch gegen die Messages API.
  */
 import * as Network from 'expo-network';
-import { holeApiKey } from './storage';
+import { holeApiKey, holeGeraeteId } from './storage';
 
-/** Für Produktion hier die eigene Server-URL eintragen, z. B. 'https://api.meine-app.de/claude'. */
-const PROXY_URL: string | null = null;
+/**
+ * Für Produktion hier die URL des deployten Workers eintragen,
+ * z. B. 'https://behoerdenklar-proxy.<account>.workers.dev'.
+ * Setup-Anleitung: proxy/README.md
+ */
+const PROXY_URL: string | null =
+  'https://behoerdenklar-proxy.behoerdenbrief.workers.dev';
+
+/** true = Produktionsmodus über den Backend-Proxy (kein API-Key in der App nötig). */
+export const NUTZT_PROXY = PROXY_URL !== null;
 
 const ANTHROPIC_URL = 'https://api.anthropic.com/v1/messages';
 const ANTHROPIC_VERSION = '2023-06-01';
 
-/** Standard-Modell für alle Aufrufe. */
-export const MODELL = 'claude-opus-4-8';
+/**
+ * Modell-Split zur Kostenoptimierung:
+ * - Brief-Analyse (Vision, Genauigkeit wichtig): Sonnet 5 (~2,5 Cent/Brief)
+ * - Übersetzung & Antwort-Entwürfe (einfache Textaufgaben): Haiku 4.5 (~halber Preis)
+ *
+ * Hinweis: Der Backend-Proxy erlaubt nur diese Modelle (Whitelist in
+ * proxy/src/index.ts) — bei Änderungen dort mitziehen.
+ */
+export const MODELL_ANALYSE = 'claude-sonnet-5';
+export const MODELL_EINFACH = 'claude-haiku-4-5';
 
 // ---- Typen für den Request-Body (Teilmenge der Messages API) ----
 
@@ -44,6 +60,8 @@ export interface DocumentBlock {
 export type ContentBlock = TextBlock | ImageBlock | DocumentBlock;
 
 export interface ClaudeRequest {
+  /** Welches Modell: MODELL_ANALYSE (Vision) oder MODELL_EINFACH (Text). */
+  modell: string;
   system?: string;
   messages: { role: 'user' | 'assistant'; content: string | ContentBlock[] }[];
   /** JSON-Schema für Structured Output — garantiert valides JSON in der Antwort. */
@@ -75,10 +93,11 @@ export async function claudeJsonAufruf<T>(anfrage: ClaudeRequest): Promise<T> {
 
   // 2. Request-Body bauen
   const body: Record<string, unknown> = {
-    model: MODELL,
+    model: anfrage.modell,
     max_tokens: anfrage.maxTokens ?? 16000,
-    // Adaptives Denken verbessert die Extraktions-Genauigkeit deutlich
-    thinking: { type: 'adaptive' },
+    // Kein explizites thinking-Feld: Sonnet 5 denkt adaptiv von selbst
+    // (gut für die Extraktions-Genauigkeit), Haiku 4.5 unterstützt den
+    // adaptiven Modus nicht und würde die Anfrage ablehnen.
     messages: anfrage.messages,
   };
   if (anfrage.system) body.system = anfrage.system;
@@ -96,6 +115,8 @@ export async function claudeJsonAufruf<T>(anfrage: ClaudeRequest): Promise<T> {
   };
   if (PROXY_URL) {
     url = PROXY_URL; // Der Proxy hält den API-Key serverseitig
+    // Anonyme ID, damit der Proxy das Tageslimit pro Gerät durchsetzen kann
+    headers['x-geraete-id'] = await holeGeraeteId();
   } else {
     const apiKey = await holeApiKey();
     if (!apiKey) {
@@ -137,8 +158,11 @@ export async function claudeJsonAufruf<T>(anfrage: ClaudeRequest): Promise<T> {
           technisch
         );
       case 429:
+        // Direkt-Modus: API-Rate-Limit. Proxy-Modus: Tageslimit pro Gerät.
         throw new ClaudeFehler(
-          'Zu viele Anfragen. Bitte warten Sie einen Moment und versuchen Sie es erneut.',
+          PROXY_URL
+            ? 'Das tägliche Kontingent ist aufgebraucht. Bitte versuchen Sie es morgen erneut.'
+            : 'Zu viele Anfragen. Bitte warten Sie einen Moment und versuchen Sie es erneut.',
           technisch
         );
       case 413:

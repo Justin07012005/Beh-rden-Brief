@@ -4,7 +4,7 @@
  * Sprache, Fachbegriffe, Fristen, Termine, Checkliste und Antwort-Optionen.
  */
 import { BriefAnalyse } from '../types';
-import { claudeJsonAufruf, ContentBlock } from './claudeClient';
+import { claudeJsonAufruf, ContentBlock, MODELL_ANALYSE } from './claudeClient';
 
 /**
  * JSON-Schema für die Analyse. Die Claude API erzwingt dieses Schema
@@ -159,6 +159,7 @@ export async function analysiereBrief(
         };
 
   return claudeJsonAufruf<BriefAnalyse>({
+    modell: MODELL_ANALYSE,
     system: SYSTEM_PROMPT,
     schema: ANALYSE_SCHEMA,
     messages: [
