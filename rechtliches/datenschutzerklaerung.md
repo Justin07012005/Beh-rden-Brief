@@ -45,8 +45,11 @@ Einwilligung jederzeit widerrufen, indem Sie in den Einstellungen
 
 ### b) Analyse-Ergebnisse, Übersetzungen, Antwort-Entwürfe
 
-Alle Ergebnisse werden **ausschließlich lokal auf Ihrem Gerät** gespeichert.
-Wir betreiben keine Nutzerkonten und keine Cloud-Speicherung Ihrer Briefe.
+Alle Ergebnisse werden **ausschließlich lokal auf Ihrem Gerät** gespeichert —
+zusätzlich verschlüsselt (AES-256-GCM; Schlüssel im Sicherheitsspeicher des
+Geräts). Wir betreiben keine Nutzerkonten und keine Cloud-Speicherung Ihrer
+Briefe. Optional: App-Sperre (Face ID / Geräte-Code) und automatisches
+Löschen nach 30/90 Tagen in den Einstellungen.
 
 ### c) Anonyme Geräte-Kennung
 

@@ -9,6 +9,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { RootStackParamList } from './src/types';
 import { useAppStore } from './src/store/useAppStore';
 import { initialisiereBenachrichtigungen } from './src/services/erinnerungen';
+import { AppSchutz } from './src/components/AppSchutz';
 import { farben, schrift } from './src/theme';
 import { HomeScreen } from './src/screens/HomeScreen';
 import { ConsentScreen } from './src/screens/ConsentScreen';
@@ -29,8 +30,9 @@ export default function App() {
   }, [initialisiere]);
 
   return (
-    <NavigationContainer>
-      <StatusBar style="dark" />
+    <AppSchutz>
+      <NavigationContainer>
+        <StatusBar style="dark" />
       <Stack.Navigator
         screenOptions={{
           headerStyle: { backgroundColor: farben.hintergrund },
@@ -47,7 +49,8 @@ export default function App() {
         <Stack.Screen name="Antwort" component={AntwortScreen} options={{ title: 'Antwort erstellen' }} />
         <Stack.Screen name="Glossar" component={GlossarScreen} options={{ title: 'Behörden-Glossar' }} />
         <Stack.Screen name="Einstellungen" component={EinstellungenScreen} options={{ title: 'Einstellungen' }} />
-      </Stack.Navigator>
-    </NavigationContainer>
+        </Stack.Navigator>
+      </NavigationContainer>
+    </AppSchutz>
   );
 }

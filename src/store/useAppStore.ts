@@ -4,7 +4,8 @@
  */
 import { create } from 'zustand';
 import { BriefEintrag, Uebersetzung, AntwortTyp } from '../types';
-import { ladeBriefe, speichereBriefe } from '../services/storage';
+import { holeAutoLoeschTage, ladeBriefe, speichereBriefe } from '../services/storage';
+import { filtereAlteBriefe } from '../utils/aufbewahrung';
 
 interface AppState {
   briefe: BriefEintrag[];
@@ -28,7 +29,14 @@ export const useAppStore = create<AppState>((set, get) => ({
   geladen: false,
 
   initialisiere: async () => {
-    const briefe = await ladeBriefe();
+    let briefe = await ladeBriefe();
+    // Auto-Löschen (Datensparsamkeit): abgelaufene Briefe beim Start entfernen
+    const aufbewahrungTage = await holeAutoLoeschTage();
+    const gefiltert = filtereAlteBriefe(briefe, aufbewahrungTage);
+    if (gefiltert.length !== briefe.length) {
+      briefe = gefiltert;
+      await speichereBriefe(briefe);
+    }
     set({ briefe, geladen: true });
   },
 

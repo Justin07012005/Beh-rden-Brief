@@ -42,6 +42,12 @@
       "expo-notifications",
       "expo-status-bar",
       [
+        "expo-local-authentication",
+        {
+          "faceIDPermission": "BehördenKlar nutzt Face ID, um Ihre gescannten Briefe vor fremdem Zugriff zu schützen."
+        }
+      ],
+      [
         "expo-splash-screen",
         {
           "image": "./assets/splash-icon.png",

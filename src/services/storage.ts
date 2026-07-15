@@ -1,15 +1,21 @@
 /**
  * Lokale Speicherung.
  * - API-Key: expo-secure-store (verschlüsselt, nie im Klartext auf der Platte)
- * - Brief-Archiv + Einwilligung: AsyncStorage (bleibt auf dem Gerät)
+ * - Brief-Archiv: AsyncStorage, aber AES-256-GCM-verschlüsselt (siehe krypto.ts)
+ * - Einwilligung & Einstellungen: AsyncStorage (unkritische Flags)
  *
  * Datenschutz: Alle Daten bleiben lokal. Nichts wird an Server gesendet,
  * außer dem Briefinhalt zur KI-Analyse (nach expliziter Einwilligung).
- * loescheAlleDaten() entfernt restlos alles.
+ * loescheAlleDaten() entfernt restlos alles — inklusive Archiv-Schlüssel.
  */
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as SecureStore from 'expo-secure-store';
 import { BriefEintrag } from '../types';
+import {
+  entschluesseleText,
+  loescheArchivSchluessel,
+  verschluesseleText,
+} from './krypto';
 
 const KEY_API = 'anthropic_api_key';
 const KEY_BRIEFE = 'behoerdenklar_briefe';
@@ -112,21 +118,65 @@ export async function speichereConsent(): Promise<void> {
   await AsyncStorage.setItem(KEY_CONSENT, 'ja');
 }
 
-// ---- Brief-Archiv ----
+// ---- Brief-Archiv (verschlüsselt) ----
 
 export async function ladeBriefe(): Promise<BriefEintrag[]> {
   const roh = await AsyncStorage.getItem(KEY_BRIEFE);
   if (!roh) return [];
   try {
-    return JSON.parse(roh) as BriefEintrag[];
+    // Migration: Bestände aus Versionen vor der Verschlüsselung liegen als
+    // Klartext-JSON-Array vor ('['), base64-Chiffrate nie. Einmalig
+    // verschlüsselt neu schreiben.
+    if (roh.startsWith('[')) {
+      const briefe = JSON.parse(roh) as BriefEintrag[];
+      await speichereBriefe(briefe);
+      return briefe;
+    }
+    return JSON.parse(await entschluesseleText(roh)) as BriefEintrag[];
   } catch {
-    // Korrupte Daten nicht crashen lassen — leeres Archiv liefern
+    // Korrupte/unlesbare Daten nicht crashen lassen — leeres Archiv liefern
     return [];
   }
 }
 
 export async function speichereBriefe(briefe: BriefEintrag[]): Promise<void> {
-  await AsyncStorage.setItem(KEY_BRIEFE, JSON.stringify(briefe));
+  await AsyncStorage.setItem(
+    KEY_BRIEFE,
+    await verschluesseleText(JSON.stringify(briefe))
+  );
+}
+
+// ---- Sicherheits-Einstellungen ----
+
+const KEY_APP_SPERRE = 'behoerdenklar_app_sperre';
+const KEY_AUTO_LOESCHEN = 'behoerdenklar_auto_loeschen_tage';
+
+/** Ist die App-Sperre (Face ID / Geräte-Code beim Öffnen) aktiviert? */
+export async function holeAppSperre(): Promise<boolean> {
+  return (await AsyncStorage.getItem(KEY_APP_SPERRE)) === 'ja';
+}
+
+export async function setzeAppSperre(aktiv: boolean): Promise<void> {
+  if (aktiv) {
+    await AsyncStorage.setItem(KEY_APP_SPERRE, 'ja');
+  } else {
+    await AsyncStorage.removeItem(KEY_APP_SPERRE);
+  }
+}
+
+/** Nach wie vielen Tagen Briefe automatisch gelöscht werden (0 = nie). */
+export async function holeAutoLoeschTage(): Promise<number> {
+  const roh = await AsyncStorage.getItem(KEY_AUTO_LOESCHEN);
+  const tage = roh ? parseInt(roh, 10) : 0;
+  return Number.isFinite(tage) && tage > 0 ? tage : 0;
+}
+
+export async function setzeAutoLoeschTage(tage: number): Promise<void> {
+  if (tage > 0) {
+    await AsyncStorage.setItem(KEY_AUTO_LOESCHEN, String(tage));
+  } else {
+    await AsyncStorage.removeItem(KEY_AUTO_LOESCHEN);
+  }
 }
 
 // ---- Alles löschen (Datenschutz-Anforderung) ----
@@ -141,6 +191,10 @@ export async function loescheAlleDaten(): Promise<void> {
     KEY_GERAETE_ID,
     KEY_SCAN_ANZAHL,
     KEY_BONUS,
+    KEY_APP_SPERRE,
+    KEY_AUTO_LOESCHEN,
   ]);
   await SecureStore.deleteItemAsync(KEY_API);
+  // Archiv-Schlüssel zuletzt: danach wären Restdaten ohnehin unlesbar
+  await loescheArchivSchluessel();
 }
