@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>BehördenKlar – Behördenbriefe einfach verstehen</title>
-  <meta name="description" content="BehördenKlar erklärt Behördenbriefe in einfacher Sprache. Support und Kontakt.">
+  <title>BehördenKlar – Brief vom Amt? In 1 Minute verstehen.</title>
+  <meta name="description" content="BehördenKlar erklärt Behördenbriefe in einfacher Sprache. Foto machen, verstehen, richtig reagieren. Bald für iPhone – jetzt anmelden und 5 Gratis-Analysen sichern.">
   <style>
     :root { color-scheme: light; }
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -12,57 +12,165 @@
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       color: #1a1a2e; background: #f4f8fb; line-height: 1.7;
     }
-    .wrap { max-width: 640px; margin: 0 auto; padding: 32px 20px 64px; }
-    header { text-align: center; padding: 48px 0 32px; }
-    .logo { font-size: 56px; }
-    h1 { font-size: 32px; margin-top: 12px; color: #144d8c; }
-    .slogan { font-size: 18px; color: #4a5568; margin-top: 8px; }
+    .wrap { max-width: 680px; margin: 0 auto; padding: 0 20px 64px; }
+
+    /* Hero */
+    header { text-align: center; padding: 56px 0 40px; }
+    .logo { font-size: 64px; }
+    h1 { font-size: 34px; margin-top: 16px; color: #144d8c; line-height: 1.25; }
+    .slogan { font-size: 19px; color: #4a5568; margin-top: 12px; }
+    .badge {
+      display: inline-block; margin-top: 16px; padding: 6px 14px;
+      background: #fff3cd; color: #7a5c00; border-radius: 999px;
+      font-size: 15px; font-weight: 600;
+    }
+    .cta {
+      display: inline-block; margin-top: 24px; padding: 16px 32px;
+      background: #1a6bc4; color: #fff; text-decoration: none;
+      border-radius: 14px; font-size: 18px; font-weight: 700;
+      box-shadow: 0 4px 12px rgba(26, 107, 196, 0.3);
+    }
+    .cta:hover { background: #144d8c; }
+
+    /* Abschnitte */
+    h2 { font-size: 24px; color: #144d8c; margin: 40px 0 16px; text-align: center; }
     .karte {
       background: #fff; border-radius: 16px; padding: 24px;
-      margin-top: 24px; box-shadow: 0 2px 8px rgba(20, 77, 140, 0.08);
+      margin-top: 16px; box-shadow: 0 2px 8px rgba(20, 77, 140, 0.08);
     }
-    h2 { font-size: 20px; color: #144d8c; margin-bottom: 12px; }
+    .schritt { display: flex; gap: 16px; align-items: flex-start; margin-bottom: 16px; }
+    .schritt:last-child { margin-bottom: 0; }
+    .schritt-nr {
+      flex-shrink: 0; width: 40px; height: 40px; border-radius: 50%;
+      background: #e6f0fb; color: #144d8c; font-weight: 700; font-size: 18px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .schritt strong { display: block; font-size: 17px; }
+
+    .features { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
+    @media (max-width: 520px) { .features { grid-template-columns: 1fr; } }
+    .feature {
+      background: #fff; border-radius: 14px; padding: 18px;
+      box-shadow: 0 2px 8px rgba(20, 77, 140, 0.08);
+    }
+    .feature .emoji { font-size: 28px; }
+    .feature strong { display: block; margin-top: 6px; font-size: 16px; }
+    .feature span { font-size: 14.5px; color: #4a5568; }
+
+    /* Anmeldung */
+    .anmeldung {
+      background: linear-gradient(135deg, #144d8c, #1a6bc4);
+      color: #fff; border-radius: 20px; padding: 32px 24px;
+      margin-top: 40px; text-align: center;
+    }
+    .anmeldung h2 { color: #fff; margin: 0 0 8px; }
+    .anmeldung p { opacity: 0.95; }
+    .bonus {
+      background: rgba(255, 255, 255, 0.15); border-radius: 12px;
+      padding: 12px 16px; margin: 16px 0; font-size: 16px;
+    }
+    .cta-hell {
+      display: inline-block; margin-top: 8px; padding: 16px 32px;
+      background: #fff; color: #144d8c; text-decoration: none;
+      border-radius: 14px; font-size: 18px; font-weight: 700;
+    }
+    .klein { font-size: 13.5px; opacity: 0.85; margin-top: 14px; }
+
+    /* FAQ + Footer */
+    details { background: #fff; border-radius: 14px; padding: 16px 20px; margin-top: 10px;
+      box-shadow: 0 2px 8px rgba(20, 77, 140, 0.08); }
+    summary { font-weight: 600; cursor: pointer; font-size: 16px; }
+    details p { margin-top: 8px; color: #4a5568; }
     a { color: #1a6bc4; }
-    .kontakt { font-size: 18px; font-weight: 600; }
-    footer { text-align: center; margin-top: 40px; font-size: 15px; color: #4a5568; }
+    footer { text-align: center; margin-top: 48px; font-size: 15px; color: #4a5568; }
     footer a { margin: 0 10px; }
   </style>
 </head>
 <body>
   <div class="wrap">
+
     <header>
       <div class="logo">📬</div>
-      <h1>BehördenKlar</h1>
-      <p class="slogan">Behördenbriefe fotografieren – und einfach verstehen.</p>
+      <h1>Brief vom Amt?<br>In 1 Minute verstehen.</h1>
+      <p class="slogan">
+        BehördenKlar erklärt Behördenbriefe in einfacher Sprache —
+        mit allen Fristen, Terminen und dem, was Sie jetzt tun müssen.
+      </p>
+      <div class="badge">📱 Bald für iPhone verfügbar</div>
+      <br>
+      <a class="cta" href="#anmelden">Jetzt anmelden – 5 Gratis-Analysen sichern</a>
     </header>
 
+    <h2>So einfach geht es</h2>
     <div class="karte">
-      <h2>Was ist BehördenKlar?</h2>
+      <div class="schritt">
+        <div class="schritt-nr">1</div>
+        <div><strong>Brief fotografieren</strong> Einfach mit dem Handy — auch PDF möglich.</div>
+      </div>
+      <div class="schritt">
+        <div class="schritt-nr">2</div>
+        <div><strong>Sofort verstehen</strong> „Was will das Amt von mir?" in einfachen Worten. Auf Wunsch in 9 weiteren Sprachen.</div>
+      </div>
+      <div class="schritt">
+        <div class="schritt-nr">3</div>
+        <div><strong>Richtig reagieren</strong> Checkliste, Frist-Erinnerung und fertiger Antwort-Entwurf.</div>
+      </div>
+    </div>
+
+    <h2>Was BehördenKlar kann</h2>
+    <div class="features">
+      <div class="feature"><span class="emoji">🚦</span><strong>Dringlichkeits-Ampel</strong><span>Rot, Gelb oder Grün — Sie sehen sofort, wie eilig es ist.</span></div>
+      <div class="feature"><span class="emoji">🌐</span><strong>9 Sprachen</strong><span>Türkçe, العربية, English, Русский, Українська und mehr.</span></div>
+      <div class="feature"><span class="emoji">✍️</span><strong>Antwort-Hilfe</strong><span>Fertige Entwürfe: Termin verschieben, Widerspruch, Unterlagen nachreichen.</span></div>
+      <div class="feature"><span class="emoji">⏰</span><strong>Nichts verpassen</strong><span>Erinnerungen vor jeder Frist, Termine direkt in den Kalender.</span></div>
+      <div class="feature"><span class="emoji">🔒</span><strong>Privat</strong><span>Ihre Briefe bleiben auf Ihrem Handy. Kein Konto nötig.</span></div>
+      <div class="feature"><span class="emoji">📖</span><strong>Amts-Wörterbuch</strong><span>Schwere Begriffe einfach erklärt — auch ohne Internet.</span></div>
+    </div>
+
+    <div class="anmeldung" id="anmelden">
+      <h2>Als Erste/r dabei sein</h2>
       <p>
-        BehördenKlar ist eine App für iPhone: Sie fotografieren einen Brief vom
-        Amt, und die App erklärt ihn in einfacher Sprache — mit allen Fristen,
-        Terminen und einer Checkliste, was zu tun ist. Auf Wunsch übersetzt in
-        9 weitere Sprachen.
+        Melden Sie sich für die Warteliste an. Wir schreiben Ihnen genau
+        einmal — wenn die App im App Store ist.
+      </p>
+      <div class="bonus">
+        🎁 <strong>Ihr Dankeschön:</strong> Sie starten mit
+        <strong>5 statt 3 kostenlosen Brief-Analysen</strong>.
+        Den Code dafür bekommen Sie per E-Mail.
+      </div>
+      <a class="cta-hell" href="mailto:behoerdenbriefhelfer@gmail.com?subject=Anmeldung%20Warteliste&body=Hallo%2C%20bitte%20informiert%20mich%2C%20wenn%20Beh%C3%B6rdenKlar%20verf%C3%BCgbar%20ist.">
+        📧 Per E-Mail anmelden
+      </a>
+      <p class="klein">
+        Mit der Anmeldung stimmen Sie zu, dass wir Ihre E-Mail-Adresse für die
+        Launch-Benachrichtigung speichern. Abmeldung jederzeit möglich —
+        Details in der <a href="datenschutz.html" style="color: #fff; text-decoration: underline;">Datenschutzerklärung</a>.
       </p>
     </div>
 
-    <div class="karte">
-      <h2>Support &amp; Kontakt</h2>
-      <p>
-        Sie haben eine Frage, ein Problem mit der App oder einen Verbesserungsvorschlag?
-        Schreiben Sie uns — wir antworten so schnell wie möglich:
-      </p>
-      <p class="kontakt" style="margin-top: 12px;">
+    <h2>Häufige Fragen</h2>
+    <details>
+      <summary>Was kostet die App?</summary>
+      <p>Der Download ist kostenlos, die ersten Brief-Analysen auch (3 — oder 5 mit Warteliste-Code). Danach gibt es ein günstiges Abo für unbegrenzte Analysen.</p>
+    </details>
+    <details>
+      <summary>Was passiert mit meinen Briefen?</summary>
+      <p>Ihre Briefe und alle Ergebnisse bleiben auf Ihrem Handy. Für die Analyse wird das Foto einmalig verschlüsselt an den KI-Dienst gesendet und dort nach spätestens 30 Tagen gelöscht. Kein Konto, keine Registrierung. Alles Weitere in der <a href="datenschutz.html">Datenschutzerklärung</a>.</p>
+    </details>
+    <details>
+      <summary>Ersetzt die App einen Anwalt?</summary>
+      <p>Nein. BehördenKlar erklärt Briefe verständlich, ist aber keine Rechtsberatung. Bei wichtigen Entscheidungen (z. B. Widerspruch) hilft eine Beratungsstelle oder eine Anwältin/ein Anwalt.</p>
+    </details>
+    <details>
+      <summary>Gibt es die App auch für Android?</summary>
+      <p>Die iPhone-Version kommt zuerst, Android ist danach geplant. Melden Sie sich auf der Warteliste an — wir informieren Sie.</p>
+    </details>
+
+    <h2>Kontakt &amp; Support</h2>
+    <div class="karte" style="text-align: center;">
+      <p>Fragen, Probleme oder Ideen? Schreiben Sie uns:</p>
+      <p style="font-size: 18px; font-weight: 600; margin-top: 8px;">
         📧 <a href="mailto:behoerdenbriefhelfer@gmail.com">behoerdenbriefhelfer@gmail.com</a>
-      </p>
-    </div>
-
-    <div class="karte">
-      <h2>Wichtiger Hinweis</h2>
-      <p>
-        BehördenKlar erklärt Briefe verständlich, ersetzt aber keine
-        Rechtsberatung. Bei rechtlich wichtigen Entscheidungen wenden Sie sich
-        bitte an eine Beratungsstelle oder eine Anwältin/einen Anwalt.
       </p>
     </div>
 

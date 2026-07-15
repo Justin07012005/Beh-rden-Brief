@@ -25,6 +25,33 @@ const KEY_SCAN_ANZAHL = 'behoerdenklar_scan_anzahl';
  */
 export const GRATIS_ANALYSEN = 3;
 
+/** Erhöhtes Kontingent für Warteliste-Anmelder (Code aus der Willkommens-Mail). */
+export const BONUS_ANALYSEN = 5;
+const KEY_BONUS = 'behoerdenklar_bonus';
+
+/**
+ * Aktions-Codes der Landingpage-Warteliste. Bewusst ein geteilter Code
+ * (kein Einmal-Code): Der "Schaden" bei Weitergabe sind 2 Extra-Analysen
+ * (~5 Cent) — dafür brauchen wir keinerlei Server-Logik.
+ */
+const GUELTIGE_CODES = ['FRUEHSTART'];
+
+export async function holeBonusAktiv(): Promise<boolean> {
+  return (await AsyncStorage.getItem(KEY_BONUS)) === 'ja';
+}
+
+/** true = Code war gültig und wurde eingelöst. */
+export async function loeseBonusCodeEin(code: string): Promise<boolean> {
+  if (!GUELTIGE_CODES.includes(code.trim().toUpperCase())) return false;
+  await AsyncStorage.setItem(KEY_BONUS, 'ja');
+  return true;
+}
+
+/** Aktuelles Gratis-Kontingent dieses Geräts (3, mit Aktions-Code 5). */
+export async function holeGratisKontingent(): Promise<number> {
+  return (await holeBonusAktiv()) ? BONUS_ANALYSEN : GRATIS_ANALYSEN;
+}
+
 // ---- API-Key (sensibel -> SecureStore) ----
 
 export async function holeApiKey(): Promise<string | null> {
@@ -113,6 +140,7 @@ export async function loescheAlleDaten(): Promise<void> {
     KEY_CONSENT,
     KEY_GERAETE_ID,
     KEY_SCAN_ANZAHL,
+    KEY_BONUS,
   ]);
   await SecureStore.deleteItemAsync(KEY_API);
 }

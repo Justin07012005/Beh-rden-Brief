@@ -13,7 +13,12 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList, BriefEintrag } from '../types';
 import { analysiereBrief } from '../services/analyse';
 import { ClaudeFehler, NUTZT_PROXY } from '../services/claudeClient';
-import { GRATIS_ANALYSEN, holeAnzahlAnalysen, zaehleAnalyse } from '../services/storage';
+import {
+  GRATIS_ANALYSEN,
+  holeAnzahlAnalysen,
+  holeGratisKontingent,
+  zaehleAnalyse,
+} from '../services/storage';
 import { planeErinnerungen } from '../services/erinnerungen';
 import { useAppStore, neueId } from '../store/useAppStore';
 import { GrossButton } from '../components/GrossButton';
@@ -54,17 +59,21 @@ export function ScanScreen({ navigation }: Props) {
   const addBrief = useAppStore((s) => s.addBrief);
   const [laedt, setLaedt] = useState(false);
   const [verbraucht, setVerbraucht] = useState(0);
+  const [kontingent, setKontingent] = useState(GRATIS_ANALYSEN);
 
-  // Zähler bei jedem Screen-Besuch frisch laden
+  // Zähler + Kontingent bei jedem Screen-Besuch frisch laden
+  // (Kontingent kann sich ändern, wenn in den Einstellungen ein
+  // Aktions-Code eingelöst wurde)
   useFocusEffect(
     useCallback(() => {
       holeAnzahlAnalysen().then(setVerbraucht);
+      holeGratisKontingent().then(setKontingent);
     }, [])
   );
 
   // Freemium gilt nur im Produktionsmodus (Proxy). Im Dev-Modus mit
   // eigenem API-Key zahlt der Entwickler selbst — kein Limit nötig.
-  const uebrig = GRATIS_ANALYSEN - verbraucht;
+  const uebrig = kontingent - verbraucht;
   const kontingentLeer = NUTZT_PROXY && uebrig <= 0;
 
   /** Prüft das Gratis-Kontingent; false = Analyse nicht starten. */
@@ -72,7 +81,7 @@ export function ScanScreen({ navigation }: Props) {
     if (!kontingentLeer) return true;
     Alert.alert(
       'Gratis-Analysen aufgebraucht',
-      `Sie haben Ihre ${GRATIS_ANALYSEN} kostenlosen Brief-Analysen genutzt. Bald können Sie hier ein Abo abschließen, um weiter Briefe zu analysieren.`
+      `Sie haben Ihre ${kontingent} kostenlosen Brief-Analysen genutzt. Bald können Sie hier ein Abo abschließen, um weiter Briefe zu analysieren.`
     );
     return false;
   };
@@ -180,7 +189,7 @@ export function ScanScreen({ navigation }: Props) {
         <Text style={styles.kontingent}>
           {kontingentLeer
             ? 'Gratis-Analysen aufgebraucht — Abo folgt in Kürze'
-            : `Noch ${uebrig} von ${GRATIS_ANALYSEN} kostenlosen Analysen`}
+            : `Noch ${uebrig} von ${kontingent} kostenlosen Analysen`}
         </Text>
       )}
     </View>

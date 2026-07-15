@@ -8,7 +8,14 @@ import { Alert, ScrollView, StyleSheet, Text, TextInput, View } from 'react-nati
 import * as Notifications from 'expo-notifications';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../types';
-import { holeApiKey, speichereApiKey, loescheAlleDaten } from '../services/storage';
+import {
+  BONUS_ANALYSEN,
+  holeApiKey,
+  holeBonusAktiv,
+  loeseBonusCodeEin,
+  loescheAlleDaten,
+  speichereApiKey,
+} from '../services/storage';
 import { NUTZT_PROXY } from '../services/claudeClient';
 import { useAppStore } from '../store/useAppStore';
 import { GrossButton } from '../components/GrossButton';
@@ -21,10 +28,30 @@ export function EinstellungenScreen({ navigation }: Props) {
   const [apiKey, setApiKey] = useState('');
   const [keyVorhanden, setKeyVorhanden] = useState(false);
   const [gespeichert, setGespeichert] = useState(false);
+  const [bonusCode, setBonusCode] = useState('');
+  const [bonusAktiv, setBonusAktiv] = useState(false);
 
   useEffect(() => {
     holeApiKey().then((k) => setKeyVorhanden(!!k));
+    holeBonusAktiv().then(setBonusAktiv);
   }, []);
+
+  const codeEinloesen = async () => {
+    const erfolg = await loeseBonusCodeEin(bonusCode);
+    if (erfolg) {
+      setBonusAktiv(true);
+      setBonusCode('');
+      Alert.alert(
+        'Code eingelöst! 🎉',
+        `Sie haben jetzt ${BONUS_ANALYSEN} kostenlose Brief-Analysen.`
+      );
+    } else {
+      Alert.alert(
+        'Code ungültig',
+        'Bitte prüfen Sie die Schreibweise. Den Code finden Sie in Ihrer Anmelde-E-Mail.'
+      );
+    }
+  };
 
   const speichern = async () => {
     await speichereApiKey(apiKey);
@@ -93,6 +120,40 @@ export function EinstellungenScreen({ navigation }: Props) {
           <View style={styles.trenner} />
         </>
       )}
+
+      <Text style={styles.abschnittTitel}>Aktions-Code</Text>
+      {bonusAktiv ? (
+        <Text style={styles.text}>
+          <Text style={{ fontWeight: '700', color: farben.ampelGruen }}>
+            Code eingelöst ✓
+          </Text>{' '}
+          — Sie haben {BONUS_ANALYSEN} kostenlose Analysen.
+        </Text>
+      ) : (
+        <>
+          <Text style={styles.hinweis}>
+            Sie haben sich auf behoerdenklar.pages.dev angemeldet? Lösen Sie
+            hier den Code aus Ihrer E-Mail ein.
+          </Text>
+          <TextInput
+            style={styles.eingabe}
+            placeholder="Code eingeben"
+            placeholderTextColor={farben.textSekundaer}
+            value={bonusCode}
+            onChangeText={setBonusCode}
+            autoCapitalize="characters"
+            autoCorrect={false}
+            accessibilityLabel="Aktions-Code eingeben"
+          />
+          <GrossButton
+            titel="Code einlösen"
+            onPress={codeEinloesen}
+            deaktiviert={!bonusCode.trim()}
+          />
+        </>
+      )}
+
+      <View style={styles.trenner} />
 
       <Text style={styles.abschnittTitel}>Datenschutz</Text>
       <View style={styles.karte}>

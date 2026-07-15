@@ -91,13 +91,25 @@ Gerät — dort können Sie sie selbst einsehen und löschen. Für Anfragen zu d
 serverseitig verarbeiteten Daten wenden Sie sich an:
 behoerdenbriefhelfer@gmail.com
 
-## 7. Keine Rechtsberatung
+## 7. Warteliste / Launch-Benachrichtigung (Webseite)
+
+Auf unserer Webseite können Sie sich für die Warteliste anmelden. Dabei
+verarbeiten wir Ihre E-Mail-Adresse auf Grundlage Ihrer Einwilligung
+(Art. 6 Abs. 1 lit. a DSGVO), ausschließlich für die Launch-Benachrichtigung
+und Informationen zur App. Abmeldung jederzeit möglich; die Adresse wird dann
+gelöscht.
+
+> [NACH BREVO/MAILERLITE-EINRICHTUNG ERGÄNZEN: Anbieter des
+> Newsletter-Dienstes als Auftragsverarbeiter benennen, z. B. „Brevo GmbH,
+> Köpenicker Str. 126, 10179 Berlin" + Double-Opt-in-Verfahren erwähnen.]
+
+## 8. Keine Rechtsberatung
 
 BehördenKlar erklärt Briefe verständlich, ersetzt aber keine Rechtsberatung.
 Bei rechtlich wichtigen Entscheidungen (z. B. Widerspruch) wenden Sie sich an
 eine Beratungsstelle oder eine Anwältin/einen Anwalt.
 
-## 8. Änderungen
+## 9. Änderungen
 
 Wir passen diese Datenschutzerklärung an, wenn sich die App oder die
 Rechtslage ändert. Die aktuelle Fassung finden Sie immer in der App unter
