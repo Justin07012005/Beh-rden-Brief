@@ -3,181 +3,376 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>BehördenKlar – Brief vom Amt? In 1 Minute verstehen.</title>
-  <meta name="description" content="BehördenKlar erklärt Behördenbriefe in einfacher Sprache. Foto machen, verstehen, richtig reagieren. Bald für iPhone – jetzt anmelden und 5 Gratis-Analysen sichern.">
+  <title>BehördenKlar – Brief rein. Klartext raus.</title>
+  <meta name="description" content="BehördenKlar übersetzt Behördenbriefe in einfache Sprache. Foto machen, verstehen, richtig reagieren. Bald für iPhone – Warteliste sichert 5 Gratis-Analysen.">
   <style>
-    :root { color-scheme: light; }
+    :root {
+      --papier: #faf7f0;
+      --papier-dunkel: #f1ecdf;
+      --tinte: #21211d;
+      --grau: #6b675e;
+      --amtsblau: #1d4e89;
+      --stempelrot: #b3372b;
+      --marker: #ffe66b;
+      --gruen: #2e7d4f;
+      color-scheme: light;
+    }
     * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      color: #1a1a2e; background: #f4f8fb; line-height: 1.7;
+      font-family: Georgia, 'Times New Roman', serif;
+      background:
+        repeating-linear-gradient(0deg, transparent 0 34px, rgba(33, 33, 29, 0.025) 34px 35px),
+        var(--papier);
+      color: var(--tinte);
+      line-height: 1.7;
+      font-size: 17px;
     }
-    .wrap { max-width: 680px; margin: 0 auto; padding: 0 20px 64px; }
+    .mono {
+      font-family: 'Courier New', ui-monospace, monospace;
+      letter-spacing: 0.02em;
+    }
+    .wrap { max-width: 720px; margin: 0 auto; padding: 0 20px 72px; }
 
-    /* Hero */
-    header { text-align: center; padding: 56px 0 40px; }
-    .logo { font-size: 64px; }
-    h1 { font-size: 34px; margin-top: 16px; color: #144d8c; line-height: 1.25; }
-    .slogan { font-size: 19px; color: #4a5568; margin-top: 12px; }
-    .badge {
-      display: inline-block; margin-top: 16px; padding: 6px 14px;
-      background: #fff3cd; color: #7a5c00; border-radius: 999px;
-      font-size: 15px; font-weight: 600;
+    /* ---------- Briefkopf ---------- */
+    .briefkopf {
+      display: flex; justify-content: space-between; align-items: baseline;
+      padding: 20px 0 12px; border-bottom: 2px solid var(--tinte);
+      font-size: 14px;
     }
+    .briefkopf .absender { font-weight: 700; font-size: 16px; }
+    .briefkopf .az { color: var(--grau); font-size: 13px; }
+
+    /* ---------- Hero ---------- */
+    header { padding: 44px 0 8px; }
+    .betreff-label {
+      font-size: 13px; color: var(--grau); text-transform: uppercase;
+      letter-spacing: 0.14em; margin-bottom: 10px;
+    }
+    h1 {
+      font-size: clamp(34px, 7vw, 52px);
+      line-height: 1.12; font-weight: 700; letter-spacing: -0.01em;
+    }
+    .markiert {
+      background: linear-gradient(104deg, transparent 2%, var(--marker) 4%, var(--marker) 96%, transparent 98%);
+      padding: 0 6px; box-decoration-break: clone; -webkit-box-decoration-break: clone;
+    }
+    .anrede { margin-top: 26px; font-size: 19px; max-width: 560px; }
+    .anrede strong { font-weight: 700; }
+
+    .hero-fuss { display: flex; align-items: center; gap: 22px; flex-wrap: wrap; margin-top: 30px; }
     .cta {
-      display: inline-block; margin-top: 24px; padding: 16px 32px;
-      background: #1a6bc4; color: #fff; text-decoration: none;
-      border-radius: 14px; font-size: 18px; font-weight: 700;
-      box-shadow: 0 4px 12px rgba(26, 107, 196, 0.3);
+      display: inline-block; padding: 17px 30px;
+      background: var(--amtsblau); color: #fff; text-decoration: none;
+      font-family: inherit; font-size: 18px; font-weight: 700;
+      border: 2px solid var(--tinte);
+      box-shadow: 5px 5px 0 var(--tinte);
+      transition: transform 0.12s ease, box-shadow 0.12s ease;
     }
-    .cta:hover { background: #144d8c; }
+    .cta:hover { transform: translate(2px, 2px); box-shadow: 3px 3px 0 var(--tinte); }
+    .stempel {
+      display: inline-block; padding: 7px 14px;
+      border: 2.5px solid var(--stempelrot); color: var(--stempelrot);
+      font-family: 'Courier New', ui-monospace, monospace; font-weight: 700;
+      font-size: 14px; letter-spacing: 0.1em; text-transform: uppercase;
+      transform: rotate(-4deg); opacity: 0.9;
+      mask-image: radial-gradient(circle at 30% 60%, black 92%, transparent 99%);
+    }
 
-    /* Abschnitte */
-    h2 { font-size: 24px; color: #144d8c; margin: 40px 0 16px; text-align: center; }
-    .karte {
-      background: #fff; border-radius: 16px; padding: 24px;
-      margin-top: 16px; box-shadow: 0 2px 8px rgba(20, 77, 140, 0.08);
+    /* ---------- Abschnitte ---------- */
+    section { margin-top: 64px; }
+    h2 {
+      font-size: 15px; text-transform: uppercase; letter-spacing: 0.14em;
+      color: var(--grau); font-weight: 400; margin-bottom: 20px;
+      display: flex; align-items: center; gap: 12px;
     }
-    .schritt { display: flex; gap: 16px; align-items: flex-start; margin-bottom: 16px; }
-    .schritt:last-child { margin-bottom: 0; }
-    .schritt-nr {
-      flex-shrink: 0; width: 40px; height: 40px; border-radius: 50%;
-      background: #e6f0fb; color: #144d8c; font-weight: 700; font-size: 18px;
-      display: flex; align-items: center; justify-content: center;
-    }
-    .schritt strong { display: block; font-size: 17px; }
+    h2::after { content: ''; flex: 1; border-top: 1px solid rgba(33,33,29,0.25); }
+    h2 .nr { font-family: 'Courier New', ui-monospace, monospace; }
 
-    .features { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
-    @media (max-width: 520px) { .features { grid-template-columns: 1fr; } }
-    .feature {
-      background: #fff; border-radius: 14px; padding: 18px;
-      box-shadow: 0 2px 8px rgba(20, 77, 140, 0.08);
+    /* ---------- Verwandlung (Kernstück) ---------- */
+    .verwandlung { display: grid; gap: 14px; }
+    .brief-karte {
+      background: #fff; border: 1px solid rgba(33, 33, 29, 0.28);
+      padding: 22px 24px; position: relative;
+      box-shadow: 4px 5px 0 rgba(33, 33, 29, 0.08);
     }
-    .feature .emoji { font-size: 28px; }
-    .feature strong { display: block; margin-top: 6px; font-size: 16px; }
-    .feature span { font-size: 14.5px; color: #4a5568; }
+    .brief-karte.amtsdeutsch {
+      transform: rotate(-0.7deg);
+      background: var(--papier-dunkel);
+    }
+    .brief-karte.klartext { transform: rotate(0.5deg); }
+    .karten-label {
+      position: absolute; top: -12px; left: 16px;
+      font-family: 'Courier New', ui-monospace, monospace; font-size: 12px;
+      text-transform: uppercase; letter-spacing: 0.1em;
+      background: var(--tinte); color: var(--papier); padding: 3px 10px;
+    }
+    .brief-karte.klartext .karten-label { background: var(--gruen); }
+    .amtsdeutsch p {
+      font-family: 'Courier New', ui-monospace, monospace;
+      font-size: 14.5px; color: #45423b; line-height: 1.75;
+    }
+    .klartext p { font-size: 18px; }
+    .klartext .ampelzeile {
+      margin-top: 14px; padding-top: 12px;
+      border-top: 1px dashed rgba(33, 33, 29, 0.3);
+      font-size: 16px; font-weight: 700;
+    }
+    .pfeil {
+      text-align: center; font-size: 15px; color: var(--grau);
+      font-family: 'Courier New', ui-monospace, monospace;
+    }
+    .quelle-hinweis { margin-top: 10px; font-size: 13.5px; color: var(--grau); }
 
-    /* Anmeldung */
-    .anmeldung {
-      background: linear-gradient(135deg, #144d8c, #1a6bc4);
-      color: #fff; border-radius: 20px; padding: 32px 24px;
-      margin-top: 40px; text-align: center;
+    /* ---------- Zahlen ---------- */
+    .zahlen { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    @media (max-width: 560px) { .zahlen { grid-template-columns: 1fr; } }
+    .zahl-karte {
+      border: 1px dashed rgba(33, 33, 29, 0.4); padding: 20px 22px;
+      background: rgba(255, 255, 255, 0.55);
     }
-    .anmeldung h2 { color: #fff; margin: 0 0 8px; }
-    .anmeldung p { opacity: 0.95; }
-    .bonus {
-      background: rgba(255, 255, 255, 0.15); border-radius: 12px;
-      padding: 12px 16px; margin: 16px 0; font-size: 16px;
-    }
-    .cta-hell {
-      display: inline-block; margin-top: 8px; padding: 16px 32px;
-      background: #fff; color: #144d8c; text-decoration: none;
-      border-radius: 14px; font-size: 18px; font-weight: 700;
-    }
-    .klein { font-size: 13.5px; opacity: 0.85; margin-top: 14px; }
+    .zahl-karte .zahl { font-size: 38px; font-weight: 700; line-height: 1.1; color: var(--amtsblau); }
+    .zahl-karte .erkl { font-size: 15px; color: var(--grau); margin-top: 6px; }
+    .zahl-karte .quelle { font-size: 12px; color: var(--grau); margin-top: 8px; font-family: 'Courier New', ui-monospace, monospace; }
 
-    /* FAQ + Footer */
-    details { background: #fff; border-radius: 14px; padding: 16px 20px; margin-top: 10px;
-      box-shadow: 0 2px 8px rgba(20, 77, 140, 0.08); }
-    summary { font-weight: 600; cursor: pointer; font-size: 16px; }
-    details p { margin-top: 8px; color: #4a5568; }
-    a { color: #1a6bc4; }
-    footer { text-align: center; margin-top: 48px; font-size: 15px; color: #4a5568; }
-    footer a { margin: 0 10px; }
+    /* ---------- Schritte ---------- */
+    .schritte { counter-reset: schritt; display: grid; gap: 0; }
+    .schritt {
+      counter-increment: schritt;
+      display: flex; gap: 20px; padding: 20px 4px;
+      border-bottom: 1px solid rgba(33, 33, 29, 0.15);
+      align-items: baseline;
+    }
+    .schritt:last-child { border-bottom: none; }
+    .schritt::before {
+      content: counter(schritt, decimal-leading-zero);
+      font-family: 'Courier New', ui-monospace, monospace;
+      font-size: 30px; font-weight: 700; color: var(--amtsblau);
+      flex-shrink: 0; width: 52px;
+    }
+    .schritt strong { font-size: 19px; display: block; margin-bottom: 2px; }
+    .schritt span { color: var(--grau); font-size: 16px; }
+
+    /* ---------- Können ---------- */
+    .koennen { display: grid; grid-template-columns: 1fr 1fr; gap: 0 32px; }
+    @media (max-width: 560px) { .koennen { grid-template-columns: 1fr; } }
+    .kann {
+      padding: 13px 0; border-bottom: 1px dotted rgba(33, 33, 29, 0.3);
+      font-size: 16.5px;
+    }
+    .kann::before { content: '☑'; color: var(--gruen); font-size: 18px; margin-right: 10px; }
+
+    /* ---------- Antrag / Warteliste ---------- */
+    .antrag {
+      background: #fff; border: 2px solid var(--tinte);
+      box-shadow: 7px 8px 0 rgba(33, 33, 29, 0.9);
+      padding: 30px 28px; position: relative; margin-top: 8px;
+    }
+    .antrag .formular-kopf {
+      font-family: 'Courier New', ui-monospace, monospace;
+      font-size: 13px; text-transform: uppercase; letter-spacing: 0.1em;
+      color: var(--grau); margin-bottom: 6px;
+    }
+    .antrag h3 { font-size: 27px; line-height: 1.25; }
+    .antrag .genehmigt {
+      position: absolute; top: -16px; right: 14px;
+      transform: rotate(6deg);
+    }
+    .antrag p { margin-top: 12px; max-width: 520px; }
+    .bonus-zeile {
+      margin: 18px 0; padding: 14px 16px;
+      background: linear-gradient(104deg, transparent 1%, var(--marker) 3%, var(--marker) 97%, transparent 99%);
+      font-size: 17px;
+    }
+    .antrag .klein { font-size: 13.5px; color: var(--grau); margin-top: 14px; }
+    .antrag .klein a { color: var(--grau); }
+
+    /* ---------- FAQ ---------- */
+    details {
+      border-bottom: 1px solid rgba(33, 33, 29, 0.2);
+      padding: 14px 4px;
+    }
+    summary {
+      font-weight: 700; cursor: pointer; font-size: 17.5px;
+      list-style: none; display: flex; justify-content: space-between; gap: 12px;
+    }
+    summary::-webkit-details-marker { display: none; }
+    summary::after { content: '+'; font-family: 'Courier New', monospace; font-size: 22px; color: var(--amtsblau); }
+    details[open] summary::after { content: '–'; }
+    details p { margin-top: 10px; color: var(--grau); font-size: 16px; max-width: 580px; }
+    details a { color: var(--amtsblau); }
+
+    /* ---------- Fuß ---------- */
+    .grussformel { margin-top: 64px; font-size: 18px; }
+    .grussformel .unterschrift {
+      font-size: 30px; margin: 10px 0 2px;
+      font-style: italic;
+    }
+    .anlage {
+      margin-top: 26px; padding-top: 14px; border-top: 2px solid var(--tinte);
+      font-family: 'Courier New', ui-monospace, monospace; font-size: 13.5px; color: var(--grau);
+    }
+    footer { margin-top: 20px; font-size: 14.5px; color: var(--grau); }
+    footer a { color: var(--grau); }
   </style>
 </head>
 <body>
   <div class="wrap">
 
+    <div class="briefkopf">
+      <span class="absender">📬 BehördenKlar</span>
+      <span class="az mono">Az: KLAR-01/2026 &nbsp;·&nbsp; Anlage: 1 App</span>
+    </div>
+
     <header>
-      <div class="logo">📬</div>
-      <h1>Brief vom Amt?<br>In 1 Minute verstehen.</h1>
-      <p class="slogan">
-        BehördenKlar erklärt Behördenbriefe in einfacher Sprache —
-        mit allen Fristen, Terminen und dem, was Sie jetzt tun müssen.
+      <p class="betreff-label">Betreff</p>
+      <h1>Brief vom Amt.<br><span class="markiert">Endlich verstanden.</span></h1>
+      <p class="anrede">
+        Sehr geehrte Damen und Herren, <strong>so einfach kann Ihre Behördenpost
+        klingen:</strong> Foto machen — und BehördenKlar übersetzt Amtsdeutsch
+        in Sätze, die jeder versteht. <em>Brief rein. Klartext raus.</em>
       </p>
-      <div class="badge">📱 Bald für iPhone verfügbar</div>
-      <br>
-      <a class="cta" href="#anmelden">Jetzt anmelden – 5 Gratis-Analysen sichern</a>
+      <div class="hero-fuss">
+        <a class="cta" href="#anmelden">Früh-Zugang beantragen&nbsp;→</a>
+        <span class="stempel">Bald im App&nbsp;Store</span>
+      </div>
     </header>
 
-    <h2>So einfach geht es</h2>
-    <div class="karte">
-      <div class="schritt">
-        <div class="schritt-nr">1</div>
-        <div><strong>Brief fotografieren</strong> Einfach mit dem Handy — auch PDF möglich.</div>
+    <section>
+      <h2><span class="nr">§ 1</span> Die Verwandlung</h2>
+      <div class="verwandlung">
+        <div class="brief-karte amtsdeutsch">
+          <span class="karten-label">Vorher · Original vom Amt</span>
+          <p>
+            „Gemäß § 32 SGB II wird bei Nichterscheinen ohne wichtigen Grund
+            eine Minderung des maßgebenden Regelbedarfs in Höhe von 10 vom
+            Hundert für die Dauer eines Monats festgestellt."
+          </p>
+        </div>
+        <p class="pfeil">— 📷 ein Foto später —</p>
+        <div class="brief-karte klartext">
+          <span class="karten-label">Nachher · BehördenKlar</span>
+          <p>
+            Wenn Sie ohne guten Grund nicht zum Termin kommen, bekommen Sie
+            einen Monat lang 10&nbsp;% weniger Geld. Gehen Sie hin — oder sagen
+            Sie rechtzeitig ab.
+          </p>
+          <p class="ampelzeile">🔴 Termin in 5 Tagen &nbsp;·&nbsp; ⏰ Erinnerung ist gestellt</p>
+        </div>
       </div>
-      <div class="schritt">
-        <div class="schritt-nr">2</div>
-        <div><strong>Sofort verstehen</strong> „Was will das Amt von mir?" in einfachen Worten. Auf Wunsch in 9 weiteren Sprachen.</div>
-      </div>
-      <div class="schritt">
-        <div class="schritt-nr">3</div>
-        <div><strong>Richtig reagieren</strong> Checkliste, Frist-Erinnerung und fertiger Antwort-Entwurf.</div>
-      </div>
-    </div>
-
-    <h2>Was BehördenKlar kann</h2>
-    <div class="features">
-      <div class="feature"><span class="emoji">🚦</span><strong>Dringlichkeits-Ampel</strong><span>Rot, Gelb oder Grün — Sie sehen sofort, wie eilig es ist.</span></div>
-      <div class="feature"><span class="emoji">🌐</span><strong>9 Sprachen</strong><span>Türkçe, العربية, English, Русский, Українська und mehr.</span></div>
-      <div class="feature"><span class="emoji">✍️</span><strong>Antwort-Hilfe</strong><span>Fertige Entwürfe: Termin verschieben, Widerspruch, Unterlagen nachreichen.</span></div>
-      <div class="feature"><span class="emoji">⏰</span><strong>Nichts verpassen</strong><span>Erinnerungen vor jeder Frist, Termine direkt in den Kalender.</span></div>
-      <div class="feature"><span class="emoji">🔒</span><strong>Privat</strong><span>Ihre Briefe bleiben auf Ihrem Handy. Kein Konto nötig.</span></div>
-      <div class="feature"><span class="emoji">📖</span><strong>Amts-Wörterbuch</strong><span>Schwere Begriffe einfach erklärt — auch ohne Internet.</span></div>
-    </div>
-
-    <div class="anmeldung" id="anmelden">
-      <h2>Als Erste/r dabei sein</h2>
-      <p>
-        Melden Sie sich für die Warteliste an. Wir schreiben Ihnen genau
-        einmal — wenn die App im App Store ist.
+      <p class="quelle-hinweis">
+        Dazu: Checkliste, was Sie mitbringen müssen — und auf Wunsch ein
+        fertiger Antwort-Entwurf.
       </p>
-      <div class="bonus">
-        🎁 <strong>Ihr Dankeschön:</strong> Sie starten mit
-        <strong>5 statt 3 kostenlosen Brief-Analysen</strong>.
-        Den Code dafür bekommen Sie per E-Mail.
+    </section>
+
+    <section>
+      <h2><span class="nr">§ 2</span> Sie sind nicht allein</h2>
+      <div class="zahlen">
+        <div class="zahl-karte">
+          <div class="zahl">6,2 Mio.</div>
+          <div class="erkl">Erwachsene in Deutschland können schwere Texte kaum lesen — Behördenbriefe sind für sie eine Mauer.</div>
+          <div class="quelle">Quelle: LEO-Studie 2018, Uni Hamburg</div>
+        </div>
+        <div class="zahl-karte">
+          <div class="zahl">~ 60 Sek.</div>
+          <div class="erkl">braucht BehördenKlar, um einen Brief zu erklären — in Deutsch oder 9 weiteren Sprachen.</div>
+          <div class="quelle">Türkçe · العربية · English · Українська …</div>
+        </div>
       </div>
-      <a class="cta-hell" href="mailto:behoerdenbriefhelfer@gmail.com?subject=Anmeldung%20Warteliste&body=Hallo%2C%20bitte%20informiert%20mich%2C%20wenn%20Beh%C3%B6rdenKlar%20verf%C3%BCgbar%20ist.">
-        📧 Per E-Mail anmelden
-      </a>
-      <p class="klein">
-        Mit der Anmeldung stimmen Sie zu, dass wir Ihre E-Mail-Adresse für die
-        Launch-Benachrichtigung speichern. Abmeldung jederzeit möglich —
-        Details in der <a href="datenschutz.html" style="color: #fff; text-decoration: underline;">Datenschutzerklärung</a>.
-      </p>
+    </section>
+
+    <section>
+      <h2><span class="nr">§ 3</span> So funktioniert es</h2>
+      <div class="schritte">
+        <div class="schritt">
+          <div><strong>Brief fotografieren</strong> <span>Mit dem Handy, auch als PDF. Gute Beleuchtung reicht.</span></div>
+        </div>
+        <div class="schritt">
+          <div><strong>Klartext lesen</strong> <span>„Was will das Amt von mir?" — kurz, einfach, ohne Fachchinesisch. Die Ampel zeigt, wie dringend es ist.</span></div>
+        </div>
+        <div class="schritt">
+          <div><strong>Richtig reagieren</strong> <span>Checkliste abhaken, Frist-Erinnerung stellen, Antwort-Entwurf anpassen und abschicken.</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2><span class="nr">§ 4</span> Was die App kann</h2>
+      <div class="koennen">
+        <div class="kann">Dringlichkeits-Ampel 🔴🟡🟢</div>
+        <div class="kann">Übersetzung in 9 Sprachen</div>
+        <div class="kann">Fertige Antwort-Entwürfe</div>
+        <div class="kann">Fristen-Erinnerungen</div>
+        <div class="kann">Termine in den Kalender</div>
+        <div class="kann">Amts-Wörterbuch, offline</div>
+        <div class="kann">Vorlese-Funktion</div>
+        <div class="kann">Kein Konto, keine Anmeldung</div>
+      </div>
+    </section>
+
+    <section id="anmelden">
+      <h2><span class="nr">§ 5</span> Früh-Zugang</h2>
+      <div class="antrag">
+        <span class="stempel genehmigt">Vorab genehmigt ✓</span>
+        <p class="formular-kopf">Formular F-01 · Warteliste</p>
+        <h3>Antrag auf Früh-Zugang</h3>
+        <p>
+          Tragen Sie sich ein, bevor die App erscheint. Wir schreiben Ihnen
+          genau <strong>eine</strong> E-Mail — am Tag, an dem BehördenKlar im
+          App Store ist.
+        </p>
+        <p class="bonus-zeile">
+          🎁 <strong>Nur für Wartelisten-Mitglieder:</strong> Sie starten mit
+          <strong>5 statt 3</strong> kostenlosen Brief-Analysen. Der Code kommt
+          mit Ihrer Bestätigung.
+        </p>
+        <a class="cta" href="mailto:behoerdenbriefhelfer@gmail.com?subject=Anmeldung%20Warteliste&body=Hallo%2C%20bitte%20informiert%20mich%2C%20wenn%20Beh%C3%B6rdenKlar%20verf%C3%BCgbar%20ist.">
+          📧 Per E-Mail eintragen
+        </a>
+        <p class="klein">
+          Ihre Adresse wird nur für die Launch-Nachricht gespeichert, keine
+          Werbung, Abmeldung jederzeit — <a href="datenschutz.html">Datenschutzerklärung</a>.
+        </p>
+      </div>
+    </section>
+
+    <section>
+      <h2><span class="nr">§ 6</span> Häufige Fragen</h2>
+      <details>
+        <summary>Was kostet die App?</summary>
+        <p>Der Download ist kostenlos, die ersten Analysen auch (3 — mit Wartelisten-Code 5). Danach gibt es ein günstiges Abo für unbegrenzte Analysen. Faire Sache: Erst testen, dann entscheiden.</p>
+      </details>
+      <details>
+        <summary>Was passiert mit meinen Briefen?</summary>
+        <p>Ihre Briefe und Ergebnisse bleiben auf Ihrem Handy. Für die Analyse wird das Foto einmalig verschlüsselt an den KI-Dienst gesendet und dort nach spätestens 30 Tagen gelöscht. Kein Konto, kein Nutzerprofil. Details in der <a href="datenschutz.html">Datenschutzerklärung</a>.</p>
+      </details>
+      <details>
+        <summary>Ersetzt die App einen Anwalt?</summary>
+        <p>Nein. BehördenKlar erklärt Briefe verständlich, ist aber keine Rechtsberatung. Bei wichtigen Entscheidungen (z.&nbsp;B. Widerspruch) hilft eine Beratungsstelle oder eine Anwältin/ein Anwalt.</p>
+      </details>
+      <details>
+        <summary>Kommt die App auch für Android?</summary>
+        <p>Ja, geplant — die iPhone-Version erscheint zuerst. Wartelisten-Mitglieder erfahren es als Erste.</p>
+      </details>
+    </section>
+
+    <div class="grussformel">
+      <p>Mit freundlichen — und verständlichen — Grüßen</p>
+      <p class="unterschrift">Ihr BehördenKlar</p>
+      <p class="mono" style="font-size: 13.5px; color: var(--grau);">i. A. der Verständlichkeit</p>
+
+      <div class="anlage">
+        Anlagen: <a href="impressum.html" style="color: inherit;">Impressum</a> ·
+        <a href="datenschutz.html" style="color: inherit;">Datenschutzerklärung</a> ·
+        Kontakt: <a href="mailto:behoerdenbriefhelfer@gmail.com" style="color: inherit;">behoerdenbriefhelfer@gmail.com</a>
+      </div>
+      <footer>
+        Dieser „Bescheid" ist zum Glück keiner: kein Amtsdeutsch, keine Frist,
+        kein Kleingedrucktes. Nur eine App, die hilft.
+      </footer>
     </div>
 
-    <h2>Häufige Fragen</h2>
-    <details>
-      <summary>Was kostet die App?</summary>
-      <p>Der Download ist kostenlos, die ersten Brief-Analysen auch (3 — oder 5 mit Warteliste-Code). Danach gibt es ein günstiges Abo für unbegrenzte Analysen.</p>
-    </details>
-    <details>
-      <summary>Was passiert mit meinen Briefen?</summary>
-      <p>Ihre Briefe und alle Ergebnisse bleiben auf Ihrem Handy. Für die Analyse wird das Foto einmalig verschlüsselt an den KI-Dienst gesendet und dort nach spätestens 30 Tagen gelöscht. Kein Konto, keine Registrierung. Alles Weitere in der <a href="datenschutz.html">Datenschutzerklärung</a>.</p>
-    </details>
-    <details>
-      <summary>Ersetzt die App einen Anwalt?</summary>
-      <p>Nein. BehördenKlar erklärt Briefe verständlich, ist aber keine Rechtsberatung. Bei wichtigen Entscheidungen (z. B. Widerspruch) hilft eine Beratungsstelle oder eine Anwältin/ein Anwalt.</p>
-    </details>
-    <details>
-      <summary>Gibt es die App auch für Android?</summary>
-      <p>Die iPhone-Version kommt zuerst, Android ist danach geplant. Melden Sie sich auf der Warteliste an — wir informieren Sie.</p>
-    </details>
-
-    <h2>Kontakt &amp; Support</h2>
-    <div class="karte" style="text-align: center;">
-      <p>Fragen, Probleme oder Ideen? Schreiben Sie uns:</p>
-      <p style="font-size: 18px; font-weight: 600; margin-top: 8px;">
-        📧 <a href="mailto:behoerdenbriefhelfer@gmail.com">behoerdenbriefhelfer@gmail.com</a>
-      </p>
-    </div>
-
-    <footer>
-      <a href="impressum.html">Impressum</a> ·
-      <a href="datenschutz.html">Datenschutzerklärung</a>
-    </footer>
   </div>
 </body>
 </html>
