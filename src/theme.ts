@@ -5,18 +5,20 @@
  * - Große Touch-Targets (min. 56px Höhe)
  */
 export const farben = {
-  // Grundfarben — warmer Papier-Ton als Markenzeichen (wie die Webseite):
-  // Inhalte liegen als weiße "Blätter" auf Papier
-  hintergrund: '#FAF7F0',
+  // Grundfarben — natives iOS-Vorbild: gruppierter System-Hintergrund,
+  // Inhalte als weiße Karten ohne Rahmen und Schatten (wie Einstellungen/Health)
+  hintergrund: '#F2F2F7',
   flaeche: '#FFFFFF',
-  primaer: '#1A365D',      // dunkles, ruhiges Blau
+  flaecheSekundaer: '#E9EDF3', // "graue Taste" nach Apple-Art (statt Umrandung)
+  primaer: '#1A365D',      // dunkles, ruhiges Blau (Marken-Tint)
   primaerText: '#FFFFFF',
   text: '#1A202C',
   textSekundaer: '#4A5568',
-  rand: '#E4DECF',
-  // Akzent: Textmarker-Gelb (sparsam einsetzen — nur für DIE Kernaussage)
-  markerHintergrund: '#FFF6D2',
-  markerRand: '#EBDD9A',
+  textTertiaer: '#AEAEB2',  // z. B. Chevrons (iOS systemGray2)
+  rand: '#E2E2E7',
+  // Dezente Hervorhebung für DIE Kernaussage (leichter Marken-Tint)
+  hervorhebung: '#EDF2F9',
+  hervorhebungRand: '#DCE5F1',
 
   // Dringlichkeits-Ampel (kräftig, gut unterscheidbar)
   ampelRot: '#C0392B',
@@ -48,11 +50,9 @@ export const abstand = {
 /** Mindesthöhe für alle interaktiven Elemente (Barrierefreiheit). */
 export const TOUCH_TARGET = 56;
 
-/** Dezenter Schatten, damit weiße Karten sich vom Papier-Grund abheben. */
-export const kartenSchatten = {
-  shadowColor: '#1A202C',
-  shadowOffset: { width: 0, height: 2 },
-  shadowOpacity: 0.07,
-  shadowRadius: 6,
-  elevation: 2,
-} as const;
+/**
+ * Bewusst leer: Nach Apple-Vorbild heben sich weiße Karten allein durch
+ * den grauen System-Hintergrund ab — ohne Schatten und Rahmen.
+ * (Als No-Op behalten, damit bestehende Spreads harmlos bleiben.)
+ */
+export const kartenSchatten = {} as const;

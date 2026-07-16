@@ -23,7 +23,8 @@ import { formatiereDatum } from '../services/erinnerungen';
 import { berechneAmpel } from '../utils/ampel';
 import { Ampel } from '../components/Ampel';
 import { GrossButton } from '../components/GrossButton';
-import { farben, schrift, abstand, kartenSchatten, TOUCH_TARGET } from '../theme';
+import { Ikone } from '../components/Ikone';
+import { farben, schrift, abstand, TOUCH_TARGET } from '../theme';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Analyse'>;
 
@@ -133,9 +134,13 @@ export function AnalyseScreen({ navigation, route }: Props) {
         accessibilityRole="button"
         accessibilityLabel={`Sprache ändern. Aktuell: ${sprache.name}`}
       >
-        <Text style={styles.sprachButtonText}>
-          🌐 {sprache.eigenname} {uebersetzt ? ' (übersetzt…)' : ''}
-        </Text>
+        <View style={styles.sprachZeileInhalt}>
+          <Ikone name="globus" groesse={20} farbe={farben.primaer} />
+          <Text style={styles.sprachButtonText}>
+            {sprache.eigenname} {uebersetzt ? ' (übersetzt…)' : ''}
+          </Text>
+          <Ikone name="pfeilRechts" groesse={16} farbe={farben.textTertiaer} />
+        </View>
       </Pressable>
 
       {/* Kernaussage: Was will das Amt von mir? */}
@@ -145,7 +150,7 @@ export function AnalyseScreen({ navigation, route }: Props) {
         <View style={{ marginTop: abstand.s }}>
           <GrossButton
             titel={liest ? 'Vorlesen stoppen' : 'Vorlesen'}
-            symbol={liest ? '⏹️' : '🔊'}
+            ikone={liest ? 'stopp' : 'vorlesen'}
             variante="sekundaer"
             onPress={vorlesen}
           />
@@ -162,7 +167,7 @@ export function AnalyseScreen({ navigation, route }: Props) {
         >
           {analyse.frist && (
             <Text style={styles.fristText}>
-              📅 Frist: <Text style={styles.fett}>{formatiereDatum(analyse.frist.datum)}</Text>
+              Frist: <Text style={styles.fett}>{formatiereDatum(analyse.frist.datum)}</Text>
               {'\n'}
               {analyse.frist.aktion}
             </Text>
@@ -170,13 +175,13 @@ export function AnalyseScreen({ navigation, route }: Props) {
           {analyse.termin && (
             <>
               <Text style={styles.fristText}>
-                🕐 Termin: <Text style={styles.fett}>{formatiereDatum(analyse.termin.datum)}</Text>
+                Termin: <Text style={styles.fett}>{formatiereDatum(analyse.termin.datum)}</Text>
                 {analyse.termin.uhrzeit ? ` um ${analyse.termin.uhrzeit} Uhr` : ''}
-                {analyse.termin.ort ? `\n📍 ${analyse.termin.ort}` : ''}
+                {analyse.termin.ort ? `\nOrt: ${analyse.termin.ort}` : ''}
               </Text>
               <GrossButton
                 titel="Termin zum Kalender hinzufügen"
-                symbol="🗓️"
+                ikone="kalender"
                 variante="sekundaer"
                 onPress={kalenderExport}
               />
@@ -203,7 +208,11 @@ export function AnalyseScreen({ navigation, route }: Props) {
               accessibilityRole="checkbox"
               accessibilityState={{ checked: !!erledigt[i] }}
             >
-              <Text style={styles.checkBox}>{erledigt[i] ? '☑️' : '⬜'}</Text>
+              <Ikone
+                name={erledigt[i] ? 'checkAn' : 'checkAus'}
+                groesse={26}
+                farbe={erledigt[i] ? farben.ampelGruen : farben.textTertiaer}
+              />
               <Text style={[styles.text, { flex: 1 }, erledigt[i] && styles.durchgestrichen]}>
                 {punkt}
               </Text>
@@ -229,13 +238,13 @@ export function AnalyseScreen({ navigation, route }: Props) {
       {analyse.antwort_noetig && (
         <GrossButton
           titel="Antwort erstellen"
-          symbol="✍️"
+          ikone="stift"
           onPress={() => navigation.navigate('Antwort', { briefId: brief.id })}
         />
       )}
 
       <View style={{ height: abstand.m }} />
-      <GrossButton titel="Brief löschen" symbol="🗑️" variante="gefahr" onPress={loeschen} />
+      <GrossButton titel="Brief löschen" ikone="muell" variante="gefahr" onPress={loeschen} />
       <View style={{ height: abstand.xl }} />
 
       {/* Sprach-Auswahl-Dialog */}
@@ -275,23 +284,19 @@ const styles = StyleSheet.create({
   zentriert: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   karte: {
     backgroundColor: farben.flaeche,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: farben.rand,
+    borderRadius: 12,
     padding: abstand.m,
     marginTop: abstand.m,
     gap: abstand.s,
-    ...kartenSchatten,
   },
-  // DIE Antwort der App — als "Textmarker"-Karte hervorgehoben (Markenzeichen)
+  // DIE Antwort der App — dezent im Marken-Tint hervorgehoben
   karteWichtig: {
-    backgroundColor: farben.markerHintergrund,
-    borderRadius: 16,
+    backgroundColor: farben.hervorhebung,
+    borderRadius: 12,
     borderWidth: 1,
-    borderColor: farben.markerRand,
+    borderColor: farben.hervorhebungRand,
     padding: abstand.m,
     marginTop: abstand.m,
-    ...kartenSchatten,
   },
   abschnittTitel: {
     fontSize: schrift.gross,
@@ -310,22 +315,19 @@ const styles = StyleSheet.create({
     minHeight: 44,
     paddingVertical: 4,
   },
-  checkBox: { fontSize: 24 },
   durchgestrichen: { textDecorationLine: 'line-through', color: farben.textSekundaer },
   begriffBlock: { marginBottom: abstand.s },
   begriff: { fontSize: schrift.basis, fontWeight: '700', color: farben.text },
   sprachButton: {
     marginTop: abstand.m,
     minHeight: TOUCH_TARGET,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: farben.rand,
+    borderRadius: 12,
     backgroundColor: farben.flaeche,
     justifyContent: 'center',
     paddingHorizontal: abstand.m,
-    ...kartenSchatten,
   },
-  sprachButtonText: { fontSize: schrift.basis, color: farben.text, fontWeight: '600' },
+  sprachZeileInhalt: { flexDirection: 'row', alignItems: 'center', gap: abstand.s },
+  sprachButtonText: { flex: 1, fontSize: schrift.basis, color: farben.text, fontWeight: '600' },
   modalHintergrund: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.5)',
@@ -333,7 +335,7 @@ const styles = StyleSheet.create({
     padding: abstand.l,
   },
   modalKarte: {
-    backgroundColor: farben.hintergrund,
+    backgroundColor: farben.flaeche,
     borderRadius: 14,
     padding: abstand.m,
     maxHeight: '75%',

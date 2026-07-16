@@ -260,7 +260,7 @@ export function EinstellungenScreen({ navigation }: Props) {
       <View style={styles.trenner} />
 
       <Text style={styles.abschnittTitel}>Daten löschen</Text>
-      <GrossButton titel="Alle Daten löschen" symbol="🗑️" variante="gefahr" onPress={allesLoeschen} />
+      <GrossButton titel="Alle Daten löschen" ikone="muell" variante="gefahr" onPress={allesLoeschen} />
       <View style={{ height: abstand.xl }} />
     </ScrollView>
   );

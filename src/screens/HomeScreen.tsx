@@ -18,29 +18,30 @@ import { holeConsent } from '../services/storage';
 import { berechneAmpel } from '../utils/ampel';
 import { formatiereDatum } from '../services/erinnerungen';
 import { GrossButton } from '../components/GrossButton';
-import { farben, schrift, abstand, kartenSchatten, TOUCH_TARGET } from '../theme';
+import { Ikone, IkonenName } from '../components/Ikone';
+import { farben, schrift, abstand, TOUCH_TARGET } from '../theme';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
 
-/** Quadratische Navigations-Kachel: Symbol oben, Beschriftung darunter.
+/** Quadratische Navigations-Kachel: Icon oben, Beschriftung darunter.
  *  (Löst das Platzproblem nebeneinanderstehender Text-Buttons.) */
 function Kachel({
-  symbol,
+  ikone,
   titel,
   onPress,
 }: {
-  symbol: string;
+  ikone: IkonenName;
   titel: string;
   onPress: () => void;
 }) {
   return (
     <Pressable
-      style={({ pressed }) => [styles.kachel, pressed && { opacity: 0.7 }]}
+      style={({ pressed }) => [styles.kachel, pressed && { opacity: 0.65 }]}
       onPress={onPress}
       accessibilityRole="button"
       accessibilityLabel={titel}
     >
-      <Text style={styles.kachelSymbol}>{symbol}</Text>
+      <Ikone name={ikone} groesse={26} farbe={farben.primaer} />
       <Text style={styles.kachelTitel} numberOfLines={1}>
         {titel}
       </Text>
@@ -105,7 +106,7 @@ export function HomeScreen({ navigation }: Props) {
             {ampel.text}
           </Text>
         </View>
-        <Text style={styles.pfeil}>›</Text>
+        <Ikone name="pfeilRechts" groesse={18} farbe={farben.textTertiaer} />
       </Pressable>
     );
   };
@@ -122,11 +123,11 @@ export function HomeScreen({ navigation }: Props) {
       contentContainerStyle={styles.inhalt}
       ListHeaderComponent={
         <View style={styles.kopf}>
-          <GrossButton titel="Brief scannen" symbol="📷" onPress={scanStarten} />
+          <GrossButton titel="Brief scannen" ikone="kamera" onPress={scanStarten} />
           <View style={styles.reihe}>
-            <Kachel symbol="📖" titel="Glossar" onPress={() => navigation.navigate('Glossar')} />
+            <Kachel ikone="buch" titel="Glossar" onPress={() => navigation.navigate('Glossar')} />
             <Kachel
-              symbol="⚙️"
+              ikone="zahnrad"
               titel="Einstellungen"
               onPress={() => navigation.navigate('Einstellungen')}
             />
@@ -149,7 +150,7 @@ export function HomeScreen({ navigation }: Props) {
       ListEmptyComponent={
         briefe.length === 0 ? (
           <View style={styles.leerBox}>
-            <Text style={styles.leerSymbol}>📬</Text>
+            <Ikone name="brief" groesse={48} farbe={farben.textTertiaer} />
             <Text style={styles.leerTitel}>Noch keine Briefe</Text>
             <Text style={styles.leer}>
               Scannen Sie Ihren ersten Behördenbrief —{'\n'}in einer Minute
@@ -173,16 +174,12 @@ const styles = StyleSheet.create({
     flex: 1,
     minHeight: TOUCH_TARGET + 22,
     backgroundColor: farben.flaeche,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: farben.rand,
+    borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: abstand.s,
-    gap: 4,
-    ...kartenSchatten,
+    gap: 6,
   },
-  kachelSymbol: { fontSize: 26 },
   kachelTitel: { fontSize: schrift.klein + 1, fontWeight: '600', color: farben.primaer },
   abschnittsLabel: {
     marginTop: abstand.m,
@@ -194,8 +191,6 @@ const styles = StyleSheet.create({
   },
   suche: {
     backgroundColor: farben.flaeche,
-    borderWidth: 1,
-    borderColor: farben.rand,
     borderRadius: 12,
     padding: abstand.s,
     fontSize: schrift.basis,
@@ -206,21 +201,16 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: farben.flaeche,
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: farben.rand,
+    borderRadius: 12,
     borderLeftWidth: 6,
     padding: abstand.m,
     marginBottom: abstand.s,
     gap: abstand.s,
-    ...kartenSchatten,
   },
   kartenTitel: { fontSize: schrift.basis, fontWeight: '700', color: farben.text },
   kartenUntertitel: { fontSize: schrift.klein, color: farben.textSekundaer, marginTop: 2 },
   kartenAmpelText: { fontSize: schrift.klein, fontWeight: '600', marginTop: 2 },
-  pfeil: { fontSize: 32, color: farben.textSekundaer },
-  leerBox: { alignItems: 'center', marginTop: abstand.xl, gap: abstand.xs },
-  leerSymbol: { fontSize: 52 },
+  leerBox: { alignItems: 'center', marginTop: abstand.xl, gap: abstand.s },
   leerTitel: { fontSize: schrift.gross, fontWeight: '700', color: farben.text },
   leer: {
     textAlign: 'center',

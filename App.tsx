@@ -49,8 +49,7 @@ export default function App() {
           options={{
             title: 'BehördenKlar',
             headerLargeTitle: true,
-            headerLargeTitleStyle: { color: farben.primaer, fontWeight: '800' },
-            headerLargeStyle: { backgroundColor: farben.hintergrund },
+            headerLargeTitleStyle: { color: farben.primaer },
           }}
         />
         <Stack.Screen name="Consent" component={ConsentScreen} options={{ title: 'Datenschutz' }} />

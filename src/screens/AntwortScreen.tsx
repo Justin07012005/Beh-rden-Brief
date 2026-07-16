@@ -146,7 +146,7 @@ export function AntwortScreen({ route }: Props) {
 
         <GrossButton
           titel={text ? 'Neuen Entwurf erstellen' : 'Entwurf erstellen'}
-          symbol="✨"
+          ikone="funken"
           onPress={erzeugen}
           deaktiviert={!typ}
           laedt={laedt}
@@ -173,8 +173,8 @@ export function AntwortScreen({ route }: Props) {
               accessibilityLabel="Brieftext"
             />
             <View style={{ gap: abstand.s }}>
-              <GrossButton titel="Als PDF exportieren" symbol="📄" onPress={alsPdf} />
-              <GrossButton titel="Als Text teilen / kopieren" symbol="📤" variante="sekundaer" onPress={alsText} />
+              <GrossButton titel="Als PDF exportieren" ikone="dokument" onPress={alsPdf} />
+              <GrossButton titel="Als Text teilen / kopieren" ikone="teilen" variante="sekundaer" onPress={alsText} />
             </View>
           </>
         )}

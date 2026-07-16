@@ -1,10 +1,15 @@
 /**
- * Großer, barrierefreier Button: min. 56px hoch, große Schrift,
- * hoher Kontrast. Varianten: primär (gefüllt) und sekundär (Umriss).
+ * Großer, barrierefreier Button nach iOS-Vorbild:
+ * - primär:   gefüllt mit der Marken-Tintfarbe (wie "prominente" iOS-Buttons)
+ * - sekundär: hellgraue Fläche mit Tint-Text (wie Apples "graue Taste" —
+ *             bewusst keine Umrandung, das wirkt nativer)
+ * - gefahr:   rot gefüllt
+ * Min. 56px hoch, große Schrift, System-Icons statt Emojis.
  */
 import React from 'react';
-import { ActivityIndicator, Pressable, StyleSheet, Text } from 'react-native';
+import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
 import { farben, schrift, abstand, TOUCH_TARGET } from '../theme';
+import { Ikone, IkonenName } from './Ikone';
 
 interface Props {
   titel: string;
@@ -12,7 +17,7 @@ interface Props {
   variante?: 'primaer' | 'sekundaer' | 'gefahr';
   deaktiviert?: boolean;
   laedt?: boolean;
-  symbol?: string;
+  ikone?: IkonenName;
 }
 
 export function GrossButton({
@@ -21,10 +26,11 @@ export function GrossButton({
   variante = 'primaer',
   deaktiviert = false,
   laedt = false,
-  symbol,
+  ikone,
 }: Props) {
   const istPrimaer = variante === 'primaer';
   const istGefahr = variante === 'gefahr';
+  const inhaltsFarbe = istPrimaer || istGefahr ? farben.primaerText : farben.primaer;
   return (
     <Pressable
       onPress={onPress}
@@ -41,18 +47,12 @@ export function GrossButton({
       ]}
     >
       {laedt ? (
-        <ActivityIndicator color={istPrimaer || istGefahr ? farben.primaerText : farben.primaer} />
+        <ActivityIndicator color={inhaltsFarbe} />
       ) : (
-        <Text
-          style={[
-            styles.text,
-            (istPrimaer || istGefahr) && { color: farben.primaerText },
-            variante === 'sekundaer' && { color: farben.primaer },
-          ]}
-        >
-          {symbol ? `${symbol}  ` : ''}
-          {titel}
-        </Text>
+        <View style={styles.zeile}>
+          {ikone ? <Ikone name={ikone} farbe={inhaltsFarbe} /> : null}
+          <Text style={[styles.text, { color: inhaltsFarbe }]}>{titel}</Text>
+        </View>
       )}
     </Pressable>
   );
@@ -61,24 +61,17 @@ export function GrossButton({
 const styles = StyleSheet.create({
   button: {
     minHeight: TOUCH_TARGET,
-    borderRadius: 16,
+    borderRadius: 14,
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: abstand.l,
     paddingVertical: abstand.s,
   },
-  primaer: {
-    backgroundColor: farben.primaer,
-    // Tiefe fürs wichtigste Element auf dem Bildschirm
-    shadowColor: farben.primaer,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.28,
-    shadowRadius: 6,
-    elevation: 4,
-  },
-  sekundaer: { backgroundColor: farben.flaeche, borderWidth: 2, borderColor: farben.primaer },
+  zeile: { flexDirection: 'row', alignItems: 'center', gap: abstand.xs + 2 },
+  primaer: { backgroundColor: farben.primaer },
+  sekundaer: { backgroundColor: farben.flaecheSekundaer },
   gefahr: { backgroundColor: farben.fehler },
-  deaktiviert: { opacity: 0.5 },
-  gedrueckt: { opacity: 0.8, transform: [{ translateY: 1 }] },
-  text: { fontSize: schrift.gross, fontWeight: '700', textAlign: 'center' },
+  deaktiviert: { opacity: 0.4 },
+  gedrueckt: { opacity: 0.65 },
+  text: { fontSize: schrift.gross, fontWeight: '600', textAlign: 'center' },
 });

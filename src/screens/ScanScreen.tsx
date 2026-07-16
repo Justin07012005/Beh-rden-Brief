@@ -182,9 +182,9 @@ export function ScanScreen({ navigation }: Props) {
         Fotografieren Sie den Brief gut beleuchtet und von oben. Der ganze Text
         muss auf dem Foto sein.
       </Text>
-      <GrossButton titel="Foto aufnehmen" symbol="📷" onPress={fotoAufnehmen} />
-      <GrossButton titel="Aus Galerie wählen" symbol="🖼️" variante="sekundaer" onPress={ausGalerie} />
-      <GrossButton titel="PDF hochladen" symbol="📄" variante="sekundaer" onPress={pdfWaehlen} />
+      <GrossButton titel="Foto aufnehmen" ikone="kamera" onPress={fotoAufnehmen} />
+      <GrossButton titel="Aus Galerie wählen" ikone="galerie" variante="sekundaer" onPress={ausGalerie} />
+      <GrossButton titel="PDF hochladen" ikone="dokument" variante="sekundaer" onPress={pdfWaehlen} />
       {NUTZT_PROXY && (
         <Text style={styles.kontingent}>
           {kontingentLeer

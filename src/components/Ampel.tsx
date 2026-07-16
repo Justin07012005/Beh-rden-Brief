@@ -1,22 +1,23 @@
 /**
  * Dringlichkeits-Ampel als gut sichtbares Banner.
- * Farbe + Symbol + Text — nicht nur Farbe (Barrierefreiheit: Farbenblindheit).
+ * Farbe + Icon + Text — nicht nur Farbe (Barrierefreiheit: Farbenblindheit).
  */
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { AmpelStatus } from '../utils/ampel';
 import { abstand, schrift } from '../theme';
+import { Ikone, IkonenName } from './Ikone';
 
-const SYMBOL: Record<string, string> = { rot: '⚠️', gelb: '⏰', gruen: 'ℹ️' };
+const IKONE: Record<string, IkonenName> = { rot: 'warnung', gelb: 'wecker', gruen: 'info' };
 
 export function Ampel({ status }: { status: AmpelStatus }) {
   return (
     <View
-      style={[styles.banner, { backgroundColor: status.hintergrund, borderColor: status.farbe }]}
+      style={[styles.banner, { backgroundColor: status.hintergrund, borderLeftColor: status.farbe }]}
       accessibilityRole="alert"
       accessibilityLabel={`Dringlichkeit: ${status.text}`}
     >
-      <Text style={styles.symbol}>{SYMBOL[status.stufe]}</Text>
+      <Ikone name={IKONE[status.stufe]} groesse={26} farbe={status.farbe} />
       <Text style={[styles.text, { color: status.farbe }]}>{status.text}</Text>
     </View>
   );
@@ -26,12 +27,10 @@ const styles = StyleSheet.create({
   banner: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderWidth: 1,
     borderLeftWidth: 6,
-    borderRadius: 14,
+    borderRadius: 12,
     padding: abstand.m,
     gap: abstand.s,
   },
-  symbol: { fontSize: 28 },
   text: { flex: 1, fontSize: schrift.gross, fontWeight: '700' },
 });
