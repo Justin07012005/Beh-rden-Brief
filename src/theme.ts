@@ -5,14 +5,18 @@
  * - Große Touch-Targets (min. 56px Höhe)
  */
 export const farben = {
-  // Grundfarben
-  hintergrund: '#FFFFFF',
-  flaeche: '#F2F5F9',
+  // Grundfarben — warmer Papier-Ton als Markenzeichen (wie die Webseite):
+  // Inhalte liegen als weiße "Blätter" auf Papier
+  hintergrund: '#FAF7F0',
+  flaeche: '#FFFFFF',
   primaer: '#1A365D',      // dunkles, ruhiges Blau
   primaerText: '#FFFFFF',
   text: '#1A202C',
   textSekundaer: '#4A5568',
-  rand: '#CBD5E0',
+  rand: '#E4DECF',
+  // Akzent: Textmarker-Gelb (sparsam einsetzen — nur für DIE Kernaussage)
+  markerHintergrund: '#FFF6D2',
+  markerRand: '#EBDD9A',
 
   // Dringlichkeits-Ampel (kräftig, gut unterscheidbar)
   ampelRot: '#C0392B',
@@ -43,3 +47,12 @@ export const abstand = {
 
 /** Mindesthöhe für alle interaktiven Elemente (Barrierefreiheit). */
 export const TOUCH_TARGET = 56;
+
+/** Dezenter Schatten, damit weiße Karten sich vom Papier-Grund abheben. */
+export const kartenSchatten = {
+  shadowColor: '#1A202C',
+  shadowOffset: { width: 0, height: 2 },
+  shadowOpacity: 0.07,
+  shadowRadius: 6,
+  elevation: 2,
+} as const;

@@ -61,16 +61,24 @@ export function GrossButton({
 const styles = StyleSheet.create({
   button: {
     minHeight: TOUCH_TARGET,
-    borderRadius: 14,
+    borderRadius: 16,
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: abstand.l,
     paddingVertical: abstand.s,
   },
-  primaer: { backgroundColor: farben.primaer },
-  sekundaer: { backgroundColor: farben.hintergrund, borderWidth: 2, borderColor: farben.primaer },
+  primaer: {
+    backgroundColor: farben.primaer,
+    // Tiefe fürs wichtigste Element auf dem Bildschirm
+    shadowColor: farben.primaer,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.28,
+    shadowRadius: 6,
+    elevation: 4,
+  },
+  sekundaer: { backgroundColor: farben.flaeche, borderWidth: 2, borderColor: farben.primaer },
   gefahr: { backgroundColor: farben.fehler },
   deaktiviert: { opacity: 0.5 },
-  gedrueckt: { opacity: 0.8 },
+  gedrueckt: { opacity: 0.8, transform: [{ translateY: 1 }] },
   text: { fontSize: schrift.gross, fontWeight: '700', textAlign: 'center' },
 });

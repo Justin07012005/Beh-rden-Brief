@@ -36,13 +36,23 @@ export default function App() {
       <Stack.Navigator
         screenOptions={{
           headerStyle: { backgroundColor: farben.hintergrund },
+          headerShadowVisible: false,
           headerTintColor: farben.primaer,
           headerTitleStyle: { fontSize: schrift.gross, fontWeight: '700' },
           headerBackTitle: 'Zurück',
           contentStyle: { backgroundColor: farben.hintergrund },
         }}
       >
-        <Stack.Screen name="Home" component={HomeScreen} options={{ title: 'BehördenKlar' }} />
+        <Stack.Screen
+          name="Home"
+          component={HomeScreen}
+          options={{
+            title: 'BehördenKlar',
+            headerLargeTitle: true,
+            headerLargeTitleStyle: { color: farben.primaer, fontWeight: '800' },
+            headerLargeStyle: { backgroundColor: farben.hintergrund },
+          }}
+        />
         <Stack.Screen name="Consent" component={ConsentScreen} options={{ title: 'Datenschutz' }} />
         <Stack.Screen name="Scan" component={ScanScreen} options={{ title: 'Brief scannen' }} />
         <Stack.Screen name="Analyse" component={AnalyseScreen} options={{ title: 'Ihr Brief erklärt' }} />

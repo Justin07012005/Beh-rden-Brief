@@ -23,7 +23,7 @@ import { formatiereDatum } from '../services/erinnerungen';
 import { berechneAmpel } from '../utils/ampel';
 import { Ampel } from '../components/Ampel';
 import { GrossButton } from '../components/GrossButton';
-import { farben, schrift, abstand, TOUCH_TARGET } from '../theme';
+import { farben, schrift, abstand, kartenSchatten, TOUCH_TARGET } from '../theme';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Analyse'>;
 
@@ -154,7 +154,12 @@ export function AnalyseScreen({ navigation, route }: Props) {
 
       {/* Frist / Termin */}
       {(analyse.frist || analyse.termin) && (
-        <View style={[styles.karte, { borderColor: ampel.farbe, borderWidth: 2 }]}>
+        <View
+          style={[
+            styles.karte,
+            { backgroundColor: ampel.hintergrund, borderLeftWidth: 6, borderLeftColor: ampel.farbe },
+          ]}
+        >
           {analyse.frist && (
             <Text style={styles.fristText}>
               📅 Frist: <Text style={styles.fett}>{formatiereDatum(analyse.frist.datum)}</Text>
@@ -270,18 +275,23 @@ const styles = StyleSheet.create({
   zentriert: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   karte: {
     backgroundColor: farben.flaeche,
-    borderRadius: 14,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: farben.rand,
     padding: abstand.m,
     marginTop: abstand.m,
     gap: abstand.s,
+    ...kartenSchatten,
   },
+  // DIE Antwort der App — als "Textmarker"-Karte hervorgehoben (Markenzeichen)
   karteWichtig: {
-    backgroundColor: farben.flaeche,
-    borderRadius: 14,
-    borderWidth: 2,
-    borderColor: farben.primaer,
+    backgroundColor: farben.markerHintergrund,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: farben.markerRand,
     padding: abstand.m,
     marginTop: abstand.m,
+    ...kartenSchatten,
   },
   abschnittTitel: {
     fontSize: schrift.gross,
@@ -289,7 +299,7 @@ const styles = StyleSheet.create({
     color: farben.primaer,
     marginBottom: abstand.xs,
   },
-  kernaussage: { fontSize: schrift.gross, color: farben.text, lineHeight: 30 },
+  kernaussage: { fontSize: schrift.gross, color: farben.text, lineHeight: 30, fontWeight: '500' },
   text: { fontSize: schrift.basis, color: farben.text, lineHeight: 27 },
   fett: { fontWeight: '700' },
   fristText: { fontSize: schrift.basis, color: farben.text, lineHeight: 28 },
@@ -307,11 +317,13 @@ const styles = StyleSheet.create({
   sprachButton: {
     marginTop: abstand.m,
     minHeight: TOUCH_TARGET,
-    borderRadius: 14,
-    borderWidth: 2,
+    borderRadius: 16,
+    borderWidth: 1,
     borderColor: farben.rand,
+    backgroundColor: farben.flaeche,
     justifyContent: 'center',
     paddingHorizontal: abstand.m,
+    ...kartenSchatten,
   },
   sprachButtonText: { fontSize: schrift.basis, color: farben.text, fontWeight: '600' },
   modalHintergrund: {

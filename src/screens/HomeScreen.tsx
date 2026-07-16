@@ -18,9 +18,35 @@ import { holeConsent } from '../services/storage';
 import { berechneAmpel } from '../utils/ampel';
 import { formatiereDatum } from '../services/erinnerungen';
 import { GrossButton } from '../components/GrossButton';
-import { farben, schrift, abstand } from '../theme';
+import { farben, schrift, abstand, kartenSchatten, TOUCH_TARGET } from '../theme';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
+
+/** Quadratische Navigations-Kachel: Symbol oben, Beschriftung darunter.
+ *  (Löst das Platzproblem nebeneinanderstehender Text-Buttons.) */
+function Kachel({
+  symbol,
+  titel,
+  onPress,
+}: {
+  symbol: string;
+  titel: string;
+  onPress: () => void;
+}) {
+  return (
+    <Pressable
+      style={({ pressed }) => [styles.kachel, pressed && { opacity: 0.7 }]}
+      onPress={onPress}
+      accessibilityRole="button"
+      accessibilityLabel={titel}
+    >
+      <Text style={styles.kachelSymbol}>{symbol}</Text>
+      <Text style={styles.kachelTitel} numberOfLines={1}>
+        {titel}
+      </Text>
+    </Pressable>
+  );
+}
 
 export function HomeScreen({ navigation }: Props) {
   const briefe = useAppStore((s) => s.briefe);
@@ -58,13 +84,16 @@ export function HomeScreen({ navigation }: Props) {
     const ampel = berechneAmpel(item.analyse);
     return (
       <Pressable
-        style={({ pressed }) => [styles.karte, pressed && { opacity: 0.7 }]}
+        style={({ pressed }) => [
+          styles.karte,
+          { borderLeftColor: ampel.farbe },
+          pressed && { opacity: 0.7 },
+        ]}
         onPress={() => navigation.navigate('Analyse', { briefId: item.id })}
         onLongPress={() => loeschenBestaetigen(item)}
         accessibilityRole="button"
         accessibilityLabel={`Brief: ${item.analyse.brieftyp}. ${ampel.text}. Lange drücken zum Löschen.`}
       >
-        <View style={[styles.ampelPunkt, { backgroundColor: ampel.farbe }]} />
         <View style={{ flex: 1 }}>
           <Text style={styles.kartenTitel} numberOfLines={1}>
             {item.analyse.brieftyp}
@@ -82,65 +111,89 @@ export function HomeScreen({ navigation }: Props) {
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.kopf}>
-        <GrossButton titel="Brief scannen" symbol="📷" onPress={scanStarten} />
-        <View style={styles.reihe}>
-          <View style={{ flex: 1 }}>
-            <GrossButton
-              titel="Glossar"
-              variante="sekundaer"
-              symbol="📖"
-              onPress={() => navigation.navigate('Glossar')}
-            />
-          </View>
-          <View style={{ width: abstand.s }} />
-          <View style={{ flex: 1 }}>
-            <GrossButton
-              titel="Einstellungen"
-              variante="sekundaer"
+    <FlatList
+      style={styles.container}
+      // iOS: sorgt beim großen Titel für korrekte Abstände + Kollabieren beim Scrollen
+      contentInsetAdjustmentBehavior="automatic"
+      keyboardShouldPersistTaps="handled"
+      data={gefiltert}
+      keyExtractor={(b) => b.id}
+      renderItem={renderBrief}
+      contentContainerStyle={styles.inhalt}
+      ListHeaderComponent={
+        <View style={styles.kopf}>
+          <GrossButton titel="Brief scannen" symbol="📷" onPress={scanStarten} />
+          <View style={styles.reihe}>
+            <Kachel symbol="📖" titel="Glossar" onPress={() => navigation.navigate('Glossar')} />
+            <Kachel
               symbol="⚙️"
+              titel="Einstellungen"
               onPress={() => navigation.navigate('Einstellungen')}
             />
           </View>
+          {briefe.length > 0 && (
+            <>
+              <Text style={styles.abschnittsLabel}>Ihre Briefe</Text>
+              <TextInput
+                style={styles.suche}
+                placeholder="Im Archiv suchen…"
+                placeholderTextColor={farben.textSekundaer}
+                value={suche}
+                onChangeText={setSuche}
+                accessibilityLabel="Archiv durchsuchen"
+              />
+            </>
+          )}
         </View>
-      </View>
-
-      {briefe.length > 0 && (
-        <TextInput
-          style={styles.suche}
-          placeholder="Im Archiv suchen…"
-          placeholderTextColor={farben.textSekundaer}
-          value={suche}
-          onChangeText={setSuche}
-          accessibilityLabel="Archiv durchsuchen"
-        />
-      )}
-
-      <FlatList
-        data={gefiltert}
-        keyExtractor={(b) => b.id}
-        renderItem={renderBrief}
-        contentContainerStyle={{ padding: abstand.m, paddingTop: 0 }}
-        ListEmptyComponent={
-          <Text style={styles.leer}>
-            {briefe.length === 0
-              ? 'Noch keine Briefe.\nScannen Sie Ihren ersten Behördenbrief!'
-              : 'Keine Treffer.'}
-          </Text>
-        }
-      />
-    </View>
+      }
+      ListEmptyComponent={
+        briefe.length === 0 ? (
+          <View style={styles.leerBox}>
+            <Text style={styles.leerSymbol}>📬</Text>
+            <Text style={styles.leerTitel}>Noch keine Briefe</Text>
+            <Text style={styles.leer}>
+              Scannen Sie Ihren ersten Behördenbrief —{'\n'}in einer Minute
+              wissen Sie, was er bedeutet.
+            </Text>
+          </View>
+        ) : (
+          <Text style={styles.leer}>Keine Treffer.</Text>
+        )
+      }
+    />
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: farben.hintergrund },
-  kopf: { padding: abstand.m, gap: abstand.s },
-  reihe: { flexDirection: 'row' },
+  inhalt: { paddingHorizontal: abstand.m, paddingBottom: abstand.l },
+  kopf: { paddingTop: abstand.s, paddingBottom: abstand.s, gap: abstand.s },
+  reihe: { flexDirection: 'row', gap: abstand.s },
+  kachel: {
+    flex: 1,
+    minHeight: TOUCH_TARGET + 22,
+    backgroundColor: farben.flaeche,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: farben.rand,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: abstand.s,
+    gap: 4,
+    ...kartenSchatten,
+  },
+  kachelSymbol: { fontSize: 26 },
+  kachelTitel: { fontSize: schrift.klein + 1, fontWeight: '600', color: farben.primaer },
+  abschnittsLabel: {
+    marginTop: abstand.m,
+    fontSize: schrift.klein - 1,
+    fontWeight: '600',
+    letterSpacing: 1.2,
+    textTransform: 'uppercase',
+    color: farben.textSekundaer,
+  },
   suche: {
-    marginHorizontal: abstand.m,
-    marginBottom: abstand.s,
+    backgroundColor: farben.flaeche,
     borderWidth: 1,
     borderColor: farben.rand,
     borderRadius: 12,
@@ -154,20 +207,25 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: farben.flaeche,
     borderRadius: 14,
+    borderWidth: 1,
+    borderColor: farben.rand,
+    borderLeftWidth: 6,
     padding: abstand.m,
     marginBottom: abstand.s,
     gap: abstand.s,
+    ...kartenSchatten,
   },
-  ampelPunkt: { width: 16, height: 16, borderRadius: 8 },
   kartenTitel: { fontSize: schrift.basis, fontWeight: '700', color: farben.text },
   kartenUntertitel: { fontSize: schrift.klein, color: farben.textSekundaer, marginTop: 2 },
   kartenAmpelText: { fontSize: schrift.klein, fontWeight: '600', marginTop: 2 },
   pfeil: { fontSize: 32, color: farben.textSekundaer },
+  leerBox: { alignItems: 'center', marginTop: abstand.xl, gap: abstand.xs },
+  leerSymbol: { fontSize: 52 },
+  leerTitel: { fontSize: schrift.gross, fontWeight: '700', color: farben.text },
   leer: {
     textAlign: 'center',
     fontSize: schrift.basis,
     color: farben.textSekundaer,
-    marginTop: abstand.xl,
     lineHeight: 28,
   },
 });

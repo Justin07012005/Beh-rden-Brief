@@ -26,8 +26,9 @@ const styles = StyleSheet.create({
   banner: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderWidth: 2,
-    borderRadius: 12,
+    borderWidth: 1,
+    borderLeftWidth: 6,
+    borderRadius: 14,
     padding: abstand.m,
     gap: abstand.s,
   },
