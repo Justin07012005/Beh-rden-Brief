@@ -46,3 +46,6 @@ yarn-error.*
 
 # generierte Vorschau-Bilder
 *.docx.png
+
+# Word-Sperrdateien
+~$*
