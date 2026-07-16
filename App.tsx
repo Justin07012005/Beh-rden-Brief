@@ -37,21 +37,14 @@ export default function App() {
         screenOptions={{
           headerStyle: { backgroundColor: farben.hintergrund },
           headerShadowVisible: false,
+          // Apple-Konvention: Titel in Textfarbe, nur Interaktives im Blau-Tint
           headerTintColor: farben.primaer,
-          headerTitleStyle: { fontSize: schrift.gross, fontWeight: '700' },
+          headerTitleStyle: { fontSize: schrift.gross, fontWeight: '700', color: farben.text },
           headerBackTitle: 'Zurück',
           contentStyle: { backgroundColor: farben.hintergrund },
         }}
       >
-        <Stack.Screen
-          name="Home"
-          component={HomeScreen}
-          options={{
-            title: 'BehördenKlar',
-            headerLargeTitle: true,
-            headerLargeTitleStyle: { color: farben.primaer },
-          }}
-        />
+        <Stack.Screen name="Home" component={HomeScreen} options={{ title: 'BehördenKlar' }} />
         <Stack.Screen name="Consent" component={ConsentScreen} options={{ title: 'Datenschutz' }} />
         <Stack.Screen name="Scan" component={ScanScreen} options={{ title: 'Brief scannen' }} />
         <Stack.Screen name="Analyse" component={AnalyseScreen} options={{ title: 'Ihr Brief erklärt' }} />

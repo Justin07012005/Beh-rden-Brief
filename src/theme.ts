@@ -9,26 +9,27 @@ export const farben = {
   // Inhalte als weiße Karten ohne Rahmen und Schatten (wie Einstellungen/Health)
   hintergrund: '#F2F2F7',
   flaeche: '#FFFFFF',
-  flaecheSekundaer: '#E9EDF3', // "graue Taste" nach Apple-Art (statt Umrandung)
-  primaer: '#1A365D',      // dunkles, ruhiges Blau (Marken-Tint)
+  flaecheSekundaer: '#E9E9EB', // "graue Taste" nach Apple-Art (statt Umrandung)
+  primaer: '#007AFF',      // Apple-System-Blau (Tint für Buttons, Icons, Links)
   primaerText: '#FFFFFF',
   text: '#1A202C',
   textSekundaer: '#4A5568',
   textTertiaer: '#AEAEB2',  // z. B. Chevrons (iOS systemGray2)
   rand: '#E2E2E7',
-  // Dezente Hervorhebung für DIE Kernaussage (leichter Marken-Tint)
-  hervorhebung: '#EDF2F9',
-  hervorhebungRand: '#DCE5F1',
+  // Dezente Hervorhebung für DIE Kernaussage (leichter Blau-Tint)
+  hervorhebung: '#EAF3FF',
+  hervorhebungRand: '#D4E6FB',
 
-  // Dringlichkeits-Ampel (kräftig, gut unterscheidbar)
-  ampelRot: '#C0392B',
-  ampelGelb: '#B7791F',
-  ampelGruen: '#276749',
-  ampelRotHintergrund: '#FDECEA',
-  ampelGelbHintergrund: '#FDF6E3',
-  ampelGruenHintergrund: '#EAF6EE',
+  // Dringlichkeits-Ampel: frische Signalfarben in Apples "zugänglichen"
+  // Varianten — kräftig, aber als Text auf Weiß noch gut lesbar (WCAG)
+  ampelRot: '#D70015',
+  ampelGelb: '#C25400',
+  ampelGruen: '#1E7E34',
+  ampelRotHintergrund: '#FFEAE8',
+  ampelGelbHintergrund: '#FFF1E0',
+  ampelGruenHintergrund: '#E7F6EB',
 
-  fehler: '#C0392B',
+  fehler: '#D70015',
 };
 
 export const schrift = {
