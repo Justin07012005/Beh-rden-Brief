@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BehördenKlar – Поймите немецкие официальные письма</title>
+  <meta name="description" content="BehördenKlar объясняет немецкие официальные письма простыми словами — по-русски. Сфотографируйте письмо, поймите его, правильно отреагируйте. Скоро для iPhone.">
+  <link rel="alternate" hreflang="de" href="https://behoerdenklar.pages.dev/">
+  <link rel="alternate" hreflang="tr" href="https://behoerdenklar.pages.dev/tr">
+  <link rel="alternate" hreflang="ar" href="https://behoerdenklar.pages.dev/ar">
+  <link rel="alternate" hreflang="en" href="https://behoerdenklar.pages.dev/en">
+  <link rel="alternate" hreflang="uk" href="https://behoerdenklar.pages.dev/uk">
+  <link rel="alternate" hreflang="ru" href="https://behoerdenklar.pages.dev/ru">
+  <link rel="alternate" hreflang="pl" href="https://behoerdenklar.pages.dev/pl">
+  <style>
+    :root {
+      --papier: #faf7f0; --papier-dunkel: #f1ecdf; --tinte: #21211d;
+      --grau: #6b675e; --amtsblau: #1d4e89; --stempelrot: #b3372b;
+      --marker: #ffe66b; --gruen: #2e7d4f; color-scheme: light;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: Georgia, 'Times New Roman', serif;
+      background:
+        repeating-linear-gradient(0deg, transparent 0 34px, rgba(33,33,29,0.025) 34px 35px),
+        var(--papier);
+      color: var(--tinte); line-height: 1.7; font-size: 17px;
+    }
+    .mono { font-family: 'Courier New', ui-monospace, monospace; letter-spacing: 0.02em; }
+    .wrap { max-width: 720px; margin: 0 auto; padding: 0 20px 72px; }
+    .briefkopf {
+      display: flex; justify-content: space-between; align-items: baseline;
+      padding: 20px 0 12px; border-bottom: 2px solid var(--tinte); font-size: 14px;
+    }
+    .briefkopf .absender { font-weight: 700; font-size: 16px; }
+    .briefkopf .az { color: var(--grau); font-size: 13px; }
+    .sprachen {
+      padding: 12px 0 0; font-size: 15px; color: var(--grau);
+      display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: center;
+    }
+    .sprachen a { color: var(--amtsblau); text-decoration: none; border-bottom: 1px dotted var(--amtsblau); }
+    .sprachen .aktiv { font-weight: 700; color: var(--tinte); border-bottom: none; }
+    header { padding: 44px 0 8px; }
+    h1 { font-size: clamp(32px, 6.5vw, 48px); line-height: 1.14; font-weight: 700; }
+    .markiert {
+      background: linear-gradient(104deg, transparent 2%, var(--marker) 4%, var(--marker) 96%, transparent 98%);
+      padding: 0 6px; box-decoration-break: clone; -webkit-box-decoration-break: clone;
+    }
+    .intro { margin-top: 24px; font-size: 19px; max-width: 580px; }
+    .hero-fuss { display: flex; align-items: center; gap: 22px; flex-wrap: wrap; margin-top: 28px; }
+    .cta {
+      display: inline-block; padding: 17px 30px; background: var(--amtsblau);
+      color: #fff; text-decoration: none; font-size: 18px; font-weight: 700;
+      border: 2px solid var(--tinte); box-shadow: 5px 5px 0 var(--tinte);
+      transition: transform 0.12s ease, box-shadow 0.12s ease;
+    }
+    .cta:hover { transform: translate(2px, 2px); box-shadow: 3px 3px 0 var(--tinte); }
+    .stempel {
+      display: inline-block; padding: 7px 14px; border: 2.5px solid var(--stempelrot);
+      color: var(--stempelrot); font-family: 'Courier New', ui-monospace, monospace;
+      font-weight: 700; font-size: 14px; letter-spacing: 0.08em;
+      text-transform: uppercase; transform: rotate(-4deg); opacity: 0.9;
+    }
+    section { margin-top: 60px; }
+    h2 {
+      font-size: 15px; text-transform: uppercase; letter-spacing: 0.14em;
+      color: var(--grau); font-weight: 400; margin-bottom: 20px;
+      display: flex; align-items: center; gap: 12px;
+    }
+    h2::after { content: ''; flex: 1; border-top: 1px solid rgba(33,33,29,0.25); }
+    .verwandlung { display: grid; gap: 14px; }
+    .brief-karte {
+      background: #fff; border: 1px solid rgba(33,33,29,0.28);
+      padding: 22px 24px; position: relative;
+      box-shadow: 4px 5px 0 rgba(33,33,29,0.08);
+    }
+    .brief-karte.amtsdeutsch { transform: rotate(-0.7deg); background: var(--papier-dunkel); }
+    .brief-karte.klartext { transform: rotate(0.5deg); }
+    .karten-label {
+      position: absolute; top: -12px; left: 16px;
+      font-family: 'Courier New', ui-monospace, monospace; font-size: 12px;
+      text-transform: uppercase; letter-spacing: 0.1em;
+      background: var(--tinte); color: var(--papier); padding: 3px 10px;
+    }
+    [dir="rtl"] .karten-label { left: auto; right: 16px; }
+    .brief-karte.klartext .karten-label { background: var(--gruen); }
+    .amtsdeutsch p {
+      font-family: 'Courier New', ui-monospace, monospace;
+      font-size: 14.5px; color: #45423b; line-height: 1.75;
+    }
+    .klartext p { font-size: 18px; }
+    .pfeil { text-align: center; font-size: 15px; color: var(--grau); font-family: 'Courier New', ui-monospace, monospace; }
+    .hinweis { margin-top: 10px; font-size: 14.5px; color: var(--grau); }
+    .schritte { counter-reset: schritt; }
+    .schritt {
+      counter-increment: schritt; display: flex; gap: 20px; padding: 20px 4px;
+      border-bottom: 1px solid rgba(33,33,29,0.15); align-items: baseline;
+    }
+    .schritt:last-child { border-bottom: none; }
+    .schritt::before {
+      content: counter(schritt, decimal-leading-zero);
+      font-family: 'Courier New', ui-monospace, monospace;
+      font-size: 30px; font-weight: 700; color: var(--amtsblau);
+      flex-shrink: 0; width: 52px;
+    }
+    .schritt strong { font-size: 19px; display: block; margin-bottom: 2px; }
+    .schritt span { color: var(--grau); font-size: 16px; }
+    .antrag {
+      background: #fff; border: 2px solid var(--tinte);
+      box-shadow: 7px 8px 0 rgba(33,33,29,0.9);
+      padding: 30px 28px; position: relative; margin-top: 8px;
+    }
+    .antrag .formular-kopf {
+      font-family: 'Courier New', ui-monospace, monospace; font-size: 13px;
+      text-transform: uppercase; letter-spacing: 0.1em; color: var(--grau); margin-bottom: 6px;
+    }
+    .antrag h3 { font-size: 26px; line-height: 1.25; }
+    .antrag p { margin-top: 12px; max-width: 540px; }
+    .bonus {
+      margin: 18px 0; padding: 14px 16px; font-size: 17px;
+      background: linear-gradient(104deg, transparent 1%, var(--marker) 3%, var(--marker) 97%, transparent 99%);
+    }
+    .antrag .klein { font-size: 13.5px; color: var(--grau); margin-top: 14px; }
+    .antrag .klein a { color: var(--grau); }
+    a { color: var(--amtsblau); }
+    footer {
+      margin-top: 56px; padding-top: 14px; border-top: 2px solid var(--tinte);
+      font-size: 14.5px; color: var(--grau);
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="briefkopf">
+      <span class="absender">📬 BehördenKlar</span>
+      <span class="az mono">Az: KLAR-01/2026</span>
+    </div>
+    <nav class="sprachen" aria-label="Выберите язык">
+      🌐
+      <a href="index.html" lang="de">Deutsch</a>
+      <a href="tr.html" lang="tr">Türkçe</a>
+      <a href="ar.html" lang="ar">العربية</a>
+      <a href="en.html" lang="en">English</a>
+      <a href="uk.html" lang="uk">Українська</a>
+      <span class="aktiv">Русский</span>
+      <a href="pl.html" lang="pl">Polski</a>
+    </nav>
+
+    <header>
+      <h1>Письмо из немецкого ведомства?<br><span class="markiert">Теперь его легко понять.</span></h1>
+      <p class="intro">
+        Сфотографируйте письмо. BehördenKlar объяснит его простым немецким —
+        <strong>и по-русски</strong>. Со всеми сроками и списком, что делать.
+      </p>
+      <div class="hero-fuss">
+        <a class="cta" href="#anmelden">Записаться в список ожидания&nbsp;→</a>
+        <span class="stempel">Скоро для iPhone</span>
+      </div>
+    </header>
+
+    <section>
+      <h2>§ 1 &nbsp;Превращение</h2>
+      <div class="verwandlung">
+        <div class="brief-karte amtsdeutsch">
+          <span class="karten-label">До · Оригинал письма (на немецком)</span>
+          <p>
+            „Gemäß § 32 SGB II wird bei Nichterscheinen ohne wichtigen Grund
+            eine Minderung des maßgebenden Regelbedarfs in Höhe von 10 vom
+            Hundert festgestellt."
+          </p>
+        </div>
+        <p class="pfeil">— 📷 одно фото — и готово —</p>
+        <div class="brief-karte klartext">
+          <span class="karten-label">После · BehördenKlar по-русски</span>
+          <p>
+            Если вы не придёте на приём без уважительной причины, вы будете
+            получать на 10% меньше денег в течение одного месяца. Придите на
+            приём — или вовремя отмените его.
+          </p>
+        </div>
+      </div>
+      <p class="hinweis">
+        Приложение объясняет письма простым немецким языком и переводит на
+        русский, турецкий, арабский, английский, украинский, французский,
+        фарси, румынский и польский.
+      </p>
+    </section>
+
+    <section>
+      <h2>§ 2 &nbsp;Как это работает</h2>
+      <div class="schritte">
+        <div class="schritt"><div><strong>Сфотографируйте письмо</strong> <span>или загрузите PDF.</span></div></div>
+        <div class="schritt"><div><strong>Поймите его</strong> <span>Простые слова, на вашем языке. Светофор показывает, насколько это срочно.</span></div></div>
+        <div class="schritt"><div><strong>Правильно отреагируйте</strong> <span>Список дел, напоминание о сроке и готовый ответ.</span></div></div>
+      </div>
+    </section>
+
+    <section id="anmelden">
+      <h2>§ 3 &nbsp;Ранний доступ</h2>
+      <div class="antrag">
+        <p class="formular-kopf">Формуляр F-01 · Список ожидания</p>
+        <h3>Будьте в числе первых</h3>
+        <p>
+          Приложение скоро выйдет для iPhone. Запишитесь сейчас — мы пришлём
+          вам <strong>одно</strong> письмо, когда всё будет готово. Без
+          рекламы.
+        </p>
+        <p class="bonus">
+          🎁 <strong>Ваш подарок:</strong> анализируйте <strong>5 писем
+          бесплатно</strong> вместо 3. Код придёт по электронной почте.
+        </p>
+        <a class="cta" href="mailto:behoerdenbriefhelfer@gmail.com?subject=Anmeldung%20Warteliste%20(Russisch)&body=Hallo%2C%20bitte%20informiert%20mich%2C%20wenn%20Beh%C3%B6rdenKlar%20verf%C3%BCgbar%20ist.%20%2F%20Please%20notify%20me%20when%20Beh%C3%B6rdenKlar%20is%20available.">
+          📧 Записаться по электронной почте
+        </a>
+        <p class="klein">
+          Мы храним ваш адрес только для этого одного сообщения. Вы можете
+          отписаться в любой момент. <a href="datenschutz.html">Политика конфиденциальности (на немецком)</a>.
+        </p>
+      </div>
+    </section>
+
+    <footer>
+      Вопросы? 📧 <a href="mailto:behoerdenbriefhelfer@gmail.com">behoerdenbriefhelfer@gmail.com</a>
+      &nbsp;·&nbsp; <a href="impressum.html">Impressum (на немецком)</a>
+      &nbsp;·&nbsp; <a href="datenschutz.html">Политика конфиденциальности (на немецком)</a>
+    </footer>
+  </div>
+</body>
+</html>
