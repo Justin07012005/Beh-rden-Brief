@@ -106,13 +106,21 @@ gelöscht.
 > Newsletter-Dienstes als Auftragsverarbeiter benennen, z. B. „Brevo GmbH,
 > Köpenicker Str. 126, 10179 Berlin" + Double-Opt-in-Verfahren erwähnen.]
 
-## 8. Keine Rechtsberatung
+## 8. Reichweitenmessung (Webseite)
+
+Auf der Webseite nutzen wir Cloudflare Web Analytics (Cloudflare, Inc.,
+USA) — Besucherstatistik **ohne Cookies** und ohne Verfolgung einzelner
+Personen; erfasst werden nur zusammengefasste Werte (Seitenaufrufe,
+Herkunftsland, Browser). Rechtsgrundlage: berechtigtes Interesse
+(Art. 6 Abs. 1 lit. f DSGVO).
+
+## 9. Keine Rechtsberatung
 
 BehördenKlar erklärt Briefe verständlich, ersetzt aber keine Rechtsberatung.
 Bei rechtlich wichtigen Entscheidungen (z. B. Widerspruch) wenden Sie sich an
 eine Beratungsstelle oder eine Anwältin/einen Anwalt.
 
-## 9. Änderungen
+## 10. Änderungen
 
 Wir passen diese Datenschutzerklärung an, wenn sich die App oder die
 Rechtslage ändert. Die aktuelle Fassung finden Sie immer in der App unter
