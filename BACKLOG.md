@@ -26,7 +26,15 @@ wenn echtes Nutzer-Feedback den Bedarf zeigt.
 - [ ] Formular-Ausfüllhilfe (Anträge) — rechtlich heikler, eigener Freigabe-Check
 - [ ] Familien-/Betreuer-Modus (Briefe für Angehörige verwalten)
 - [ ] EU-Datenverarbeitung via AWS Bedrock Frankfurt (Proxy-Umbau)
-- [ ] B2B-Portal für Beratungsstellen (Lizenz-Modell)
+- [ ] **Berater-Modus für Beratungsstellen** (B2B, Lizenz-Modell ~50–100 €/Monat
+      pro Stelle): eigene Oberfläche mit Fall-Ordnern ("Nummer pro Klient" —
+      Idee von Justin, 18.07.) auf dem Berater-Gerät; Beraterin scannt Briefe
+      im Termin und legt sie pro Fall ab, kein Gratis-Limit. WICHTIG: kein
+      Fernzugriff aufs Klienten-Handy (zerstört das Datenschutz-Versprechen) —
+      stattdessen Fall-Ordner lokal beim Berater + optional aktives Teilen
+      einzelner Analysen durch den Klienten. Vor dem Bauen in den
+      Beratungsstellen-Besuchen validieren (Interview-Fragen: Nutzen?
+      Anforderungen? Zahlungsbereitschaft des Trägers?)
 
 ## UI-Wachstumspfad (damit es nie überladen wirkt)
 
