@@ -58,6 +58,12 @@ Winnweiler · behoerdenbriefhelfer@gmail.com
    - Haus der Diakonie Donnersbergkreis — slb.kibo@diakonie-pfalz.de
    - Caritas-Zentrum Kaiserslautern (Migrationsfachdienst)
 4. Beim Besuch mitnehmen: Handy/Simulator mit der App, ausgedrucktes
-   Factsheet, Zettel mit Webseiten-Link. Und die zwei Fragen stellen:
-   „Was würde Ihre Klienten davon abhalten?" und „Würden Sie einen
-   Berater-Modus nutzen (Briefe im Termin scannen, pro Fall ablegen)?"
+   Factsheet, Zettel mit Webseiten-Link. Und die drei Fragen stellen:
+   - „Was würde Ihre Klienten davon abhalten?"
+   - „Würden Sie einen Berater-Modus nutzen (Briefe im Termin scannen,
+     pro Fall ablegen)?"
+   - Bei Begeisterung: „Wer entscheidet bei Ihrem Träger über solche
+     Anschaffungen — und würden Sie mich dort vorstellen?"
+     (Merke: Die Beraterin EMPFIEHLT die App ihren Klienten — dafür
+     braucht sie niemandes Erlaubnis. Die Lizenz kauft später die
+     Leitung — aber nur auf Empfehlung ihrer eigenen Berater.)
