@@ -128,6 +128,15 @@
       margin-top: 56px; padding-top: 14px; border-top: 2px solid var(--tinte);
       font-size: 14.5px; color: var(--grau);
     }
+
+    /* Warteliste-Formular (Brevo) */
+    .wl-form { display: flex; flex-direction: column; gap: 12px; margin-top: 4px; }
+    .wl-input {
+      width: 100%; padding: 15px 16px; font-size: 17px; font-family: inherit;
+      border: 2px solid var(--tinte); background: #fff; color: var(--tinte);
+    }
+    .wl-input::placeholder { color: #9a958a; }
+    .wl-btn { width: 100%; cursor: pointer; text-align: center; font-family: inherit; }
   </style>
 </head>
 <body>
@@ -209,9 +218,13 @@
           🎁 <strong>هديتك:</strong> حلّل <strong>٥ رسائل مجاناً</strong>
           بدلاً من ٣. تحصل على الرمز عبر البريد الإلكتروني.
         </p>
-        <a class="cta" href="mailto:behoerdenbriefhelfer@gmail.com?subject=Anmeldung%20Warteliste%20(Arabisch)&body=Hallo%2C%20bitte%20informiert%20mich%2C%20wenn%20Beh%C3%B6rdenKlar%20verf%C3%BCgbar%20ist.%20%2F%20Please%20notify%20me%20when%20Beh%C3%B6rdenKlar%20is%20available.">
-          📧 سجّل عبر البريد الإلكتروني
-        </a>
+        <form class="wl-form" action="https://86550585.sibforms.com/serve/MUIFAAvOQCpFg148k-xD2Ze2PDVKKaFEIaLECCCMe9fGKd_uIurPljyn_IhTrkR0EkM_pQp_8VBzcHZ6N9sKDX5GBZi9elYKN6isXGPUUxcAgO37OKhTFZyMlJiC9ikRmPI8Q2tU2GvqP6esJ5ReGfv1htZV_OfXRIgW59P6pkeUsYKxqdXA7nWOaWxNTYz4MzzoGg7czJMJ2fxuEg==" method="POST">
+          <input class="wl-input" type="email" name="EMAIL" placeholder="بريدك الإلكتروني" required autocomplete="email">
+          <input type="text" name="email_address_check" value="" style="position:absolute; left:-5000px;" tabindex="-1" autocomplete="off" aria-hidden="true">
+          <input type="hidden" name="locale" value="de">
+          <input type="hidden" name="html_type" value="simple">
+          <button class="cta wl-btn" type="submit">سجّل في قائمة الانتظار ←</button>
+        </form>
         <p class="klein">
           نحفظ عنوان بريدك الإلكتروني فقط لهذه الرسالة الواحدة. يمكنك إلغاء
           التسجيل في أي وقت. <a href="datenschutz.html">سياسة الخصوصية (بالألمانية)</a>.
