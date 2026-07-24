@@ -99,6 +99,16 @@
       transition: transform 0.12s ease, box-shadow 0.12s ease;
     }
     .cta:hover { transform: translate(2px, 2px); box-shadow: 3px 3px 0 var(--tinte); }
+    .cta-gross { font-size: 20px; padding: 19px 34px; }
+    .hero-unter { margin-top: 16px; font-size: 16px; color: var(--grau); line-height: 1.6; }
+    .hero-unter a { color: var(--amtsblau); font-weight: 700; }
+    .probier-box {
+      margin-top: 26px; text-align: center;
+      background: var(--papier-dunkel); border: 2px dashed var(--tinte);
+      padding: 24px 22px;
+    }
+    .probier-box p { font-size: 18px; margin-bottom: 16px; }
+    .probier-box .cta { width: auto; }
     .stempel {
       display: inline-block; padding: 7px 14px;
       border: 2.5px solid var(--stempelrot); color: var(--stempelrot);
@@ -319,12 +329,12 @@
         Brief in einfachen Worten. <em>Brief rein. Klartext raus.</em>
       </p>
       <div class="hero-fuss">
-        <a class="cta" href="#anmelden">Jetzt anmelden&nbsp;→</a>
+        <a class="cta cta-gross" href="demo.html">📷 Brief testen — 2× gratis</a>
         <span class="stempel">Bald im App&nbsp;Store</span>
       </div>
-      <p style="margin-top: 18px; font-size: 17px;">
-        Erst ausprobieren? <a href="demo.html" style="color: var(--amtsblau); font-weight: 700;">Testen
-        Sie es direkt im Browser</a> — mit Ihrem eigenen Brief, 2&nbsp;Analysen gratis.
+      <p class="hero-unter">
+        Mit Ihrem eigenen Brief · kein Konto · sofort im Browser.<br>
+        Oder <a href="#anmelden">nur auf die Warteliste</a> für den Start.
       </p>
     </header>
 
@@ -354,6 +364,10 @@
         Dazu bekommen Sie: eine Liste, was Sie tun müssen — und wenn Sie
         wollen, eine fertige Antwort.
       </p>
+      <div class="probier-box">
+        <p><strong>Genau das — mit Ihrem Brief.</strong> Kein Konto, sofort im Browser.</p>
+        <a class="cta" href="demo.html">📷 Jetzt 2× gratis testen&nbsp;→</a>
+      </div>
     </section>
 
     <section>
