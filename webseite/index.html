@@ -99,9 +99,11 @@
       transition: transform 0.12s ease, box-shadow 0.12s ease;
     }
     .cta:hover { transform: translate(2px, 2px); box-shadow: 3px 3px 0 var(--tinte); }
-    .cta-gross { font-size: 20px; padding: 19px 34px; }
-    .hero-unter { margin-top: 16px; font-size: 16px; color: var(--grau); line-height: 1.6; }
+    /* Sekundär-Knopf: gleiche Form, heller — für die zweite, gleichwertige Wahl */
+    .cta-sek { background: #fff; color: var(--amtsblau); }
+    .hero-unter { margin-top: 18px; font-size: 16px; color: var(--grau); line-height: 1.7; }
     .hero-unter a { color: var(--amtsblau); font-weight: 700; }
+    .hero-unter strong { color: var(--tinte); }
     .probier-box {
       margin-top: 26px; text-align: center;
       background: var(--papier-dunkel); border: 2px dashed var(--tinte);
@@ -329,13 +331,14 @@
         Brief in einfachen Worten. <em>Brief rein. Klartext raus.</em>
       </p>
       <div class="hero-fuss">
-        <a class="cta cta-gross" href="demo.html">📷 Brief testen — 2× gratis</a>
-        <span class="stempel">Bald im App&nbsp;Store</span>
+        <a class="cta" href="demo.html">📷 Brief testen — 2× gratis</a>
+        <a class="cta cta-sek" href="#anmelden">✉️ Auf die Warteliste</a>
       </div>
       <p class="hero-unter">
-        Mit Ihrem eigenen Brief · kein Konto · sofort im Browser.<br>
-        Oder <a href="#anmelden">nur auf die Warteliste</a> für den Start.
+        <strong>Testen:</strong> mit Ihrem eigenen Brief, kein Konto, sofort im Browser.<br>
+        <strong>Warteliste:</strong> eine Nachricht zum Start — mit 5 Gratis-Analysen statt 3.
       </p>
+      <p style="margin-top: 16px;"><span class="stempel">Bald im App&nbsp;Store</span></p>
     </header>
 
     <section>
