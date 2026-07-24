@@ -212,13 +212,21 @@ async function demoHandler(request: Request, env: Env): Promise<Response> {
     mailKey = `demo:mail:${await emailHash(email, env.TURNSTILE_SECRET_KEY)}`;
   }
 
-  // Schichten 2-5: Limits lesen
+  // Schichten 2-5: Limits lesen. IP- und Anon-Zähler sind bewusst TÄGLICH
+  // (Datum im Schlüssel): Ein Anschluss, den sich mehrere Menschen teilen
+  // (Familie, WLAN, Mobilfunk/CGNAT), darf pro Tag mehrere erste Analysen
+  // machen. Sonst würde der zweite Besucher an derselben Leitung sofort zur
+  // E-Mail gezwungen. Die eigentliche "2 pro Person"-Grenze setzt der
+  // Browser (localStorage) + der E-Mail-Hash; IP ist nur ein Missbrauchs-Damm.
   const heute = new Date().toISOString().slice(0, 10);
   const tagKey = `demo:tag:${heute}`;
-  const ipKey = `demo:ip:${ip}`;
-  const anonKey = `demo:anon:${ip}`;
+  const ipKey = `demo:ip:${ip}:${heute}`;
+  const anonKey = `demo:anon:${ip}:${heute}`;
   const budget = parseInt(env.DEMO_TAGES_BUDGET || '100', 10);
-  const ipLimit = parseInt(env.DEMO_LIMIT_IP || '3', 10);
+  const ipLimit = parseInt(env.DEMO_LIMIT_IP || '8', 10);
+  // Wie viele anonyme (ohne E-Mail) Analysen ein Anschluss pro Tag darf,
+  // bevor eine E-Mail nötig wird — großzügig, damit geteilte Leitungen gehen.
+  const ANON_PRO_IP = 3;
 
   const [tagWert, ipWert, anonWert, mailWert] = await Promise.all([
     env.RATE_LIMIT.get(tagKey),
@@ -234,13 +242,14 @@ async function demoHandler(request: Request, env: Env): Promise<Response> {
   if (tagZahl >= budget) {
     return demoFehler(429, 'budget', 'Die Gratis-Demo ist für heute ausgebucht. Kommen Sie morgen wieder — oder tragen Sie sich in die Warteliste ein.', origin);
   }
-  // Schicht 4: IP-Gesamtlimit (30 Tage)
+  // Schicht 4: IP-Gesamtlimit pro Tag (Missbrauchs-Damm, großzügig)
   if (ipZahl >= ipLimit) {
-    return demoFehler(429, 'aufgebraucht', 'Die Gratis-Analysen für diesen Anschluss sind aufgebraucht. In der App gibt es 3 weitere gratis.', origin);
+    return demoFehler(429, 'aufgebraucht', 'Für heute wurden über diesen Anschluss viele Gratis-Analysen genutzt. Kommen Sie morgen wieder — oder holen Sie sich die App.', origin);
   }
-  // Schicht 2/3: ohne E-Mail nur 1x, pro E-Mail nur 1x (dauerhaft)
-  if (!email && anonZahl >= 1) {
-    return demoFehler(403, 'email_noetig', 'Ihre erste Gratis-Analyse ist verbraucht. Für die zweite geben Sie bitte Ihre E-Mail-Adresse ein.', origin);
+  // Schicht 2/3: nach mehreren anonymen Analysen pro Anschluss E-Mail nötig;
+  // pro E-Mail dauerhaft nur 1x
+  if (!email && anonZahl >= ANON_PRO_IP) {
+    return demoFehler(403, 'email_noetig', 'Für weitere Gratis-Analysen über diesen Anschluss geben Sie bitte Ihre E-Mail-Adresse ein.', origin);
   }
   if (mailKey && mailWert !== null) {
     return demoFehler(429, 'aufgebraucht', 'Mit dieser E-Mail-Adresse wurde die Gratis-Analyse schon genutzt. In der App gibt es 3 weitere gratis.', origin);
@@ -291,14 +300,15 @@ async function demoHandler(request: Request, env: Env): Promise<Response> {
     content?: { type: string; text?: string }[];
   };
 
-  // Erst NACH erfolgreichem KI-Aufruf zählen (Fehler kosten kein Kontingent)
-  const MONAT_TTL = 60 * 60 * 24 * 30;
+  // Erst NACH erfolgreichem KI-Aufruf zählen (Fehler kosten kein Kontingent).
+  // Tag-, IP- und Anon-Zähler laufen nach 48h ab (sie sind tagesbasiert).
+  const TAG_TTL = 60 * 60 * 48;
   const schreiben: Promise<void>[] = [
-    env.RATE_LIMIT.put(tagKey, String(tagZahl + 1), { expirationTtl: 60 * 60 * 48 }),
-    env.RATE_LIMIT.put(ipKey, String(ipZahl + 1), { expirationTtl: MONAT_TTL }),
+    env.RATE_LIMIT.put(tagKey, String(tagZahl + 1), { expirationTtl: TAG_TTL }),
+    env.RATE_LIMIT.put(ipKey, String(ipZahl + 1), { expirationTtl: TAG_TTL }),
   ];
   if (!email) {
-    schreiben.push(env.RATE_LIMIT.put(anonKey, String(anonZahl + 1), { expirationTtl: MONAT_TTL }));
+    schreiben.push(env.RATE_LIMIT.put(anonKey, String(anonZahl + 1), { expirationTtl: TAG_TTL }));
   }
   if (mailKey) {
     // bewusst OHNE TTL: „pro E-Mail für immer nur 1" — es liegt nur der Hash

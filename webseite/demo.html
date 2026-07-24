@@ -339,8 +339,11 @@
     var eingabe = document.getElementById('eingabe');
     var fehlerBox = document.getElementById('fehler');
 
-    function benutzt() { return parseInt(localStorage.getItem('bk_demo_benutzt') || '0', 10); }
-    function setzeBenutzt(n) { localStorage.setItem('bk_demo_benutzt', String(n)); }
+    // Schlüsselname bewusst 'v2': setzt evtl. falsch gezählte Stände (aus der
+    // Testphase) bei bestehenden Besuchern automatisch einmalig zurück.
+    var SPEICHER_SCHLUESSEL = 'bk_demo_v2';
+    function benutzt() { return parseInt(localStorage.getItem(SPEICHER_SCHLUESSEL) || '0', 10); }
+    function setzeBenutzt(n) { localStorage.setItem(SPEICHER_SCHLUESSEL, String(n)); }
 
     function zeigeStand() {
       // 2. Versuch: E-Mail-Feld einblenden; alles verbraucht: Eingabe sperren
@@ -445,7 +448,10 @@
           eingabe.style.display = 'block';
           if (window.turnstile) window.turnstile.reset();
           if (daten.code === 'email_noetig') {
-            setzeBenutzt(Math.max(benutzt(), 1));
+            // Nur das E-Mail-Feld zeigen — NICHT als verbraucht markieren.
+            // (Sonst würde ein serverseitiges "E-Mail nötig", z. B. bei
+            // geteiltem Anschluss, den Browser dauerhaft blockieren, obwohl
+            // gar keine Analyse gelungen ist.)
             emailTeil.style.display = 'block';
             emailFeld.focus();
           }

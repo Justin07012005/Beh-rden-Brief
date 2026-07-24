@@ -9,9 +9,11 @@ compatibility_date = "2026-07-01"
 TAGES_LIMIT = "20"
 TAGES_LIMIT_IP = "100"
 # Web-Demo (/demo): hartes Tagesbudget über alle Nutzer (Kosten-Deckel,
-# 100 Analysen ≈ 2,50 €/Tag Maximalschaden) + IP-Limit über 30 Tage
+# 100 Analysen ≈ 2,50 €/Tag Maximalschaden) + IP-Gesamtlimit PRO TAG
+# (großzügig, damit geteilte Anschlüsse/Familien/Mobilfunk nicht blockiert
+# werden; der Missbrauch wird zusätzlich durch Turnstile + Budget begrenzt)
 DEMO_TAGES_BUDGET = "100"
-DEMO_LIMIT_IP = "3"
+DEMO_LIMIT_IP = "8"
 
 [[kv_namespaces]]
 binding = "RATE_LIMIT"
