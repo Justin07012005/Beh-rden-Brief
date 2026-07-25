@@ -30,7 +30,8 @@ export function GrossButton({
 }: Props) {
   const istPrimaer = variante === 'primaer';
   const istGefahr = variante === 'gefahr';
-  const inhaltsFarbe = istPrimaer || istGefahr ? farben.primaerText : farben.primaer;
+  // Sekundär: dunkles Bronze statt hellem Gold — auf grauer Fläche gut lesbar
+  const inhaltsFarbe = istPrimaer || istGefahr ? farben.primaerText : farben.primaerFuellung;
   return (
     <Pressable
       onPress={onPress}
@@ -68,7 +69,7 @@ const styles = StyleSheet.create({
     paddingVertical: abstand.s,
   },
   zeile: { flexDirection: 'row', alignItems: 'center', gap: abstand.xs + 2 },
-  primaer: { backgroundColor: farben.primaer },
+  primaer: { backgroundColor: farben.primaerFuellung },
   sekundaer: { backgroundColor: farben.flaecheSekundaer },
   gefahr: { backgroundColor: farben.fehler },
   deaktiviert: { opacity: 0.4 },

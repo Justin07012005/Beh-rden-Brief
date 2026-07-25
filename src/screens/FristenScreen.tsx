@@ -177,7 +177,7 @@ export function FristenScreen() {
                         <Text style={[styles.zahlKlein, { color: f.farbe }]}>
                           {f.frist!.tage < 0 ? '!' : f.frist!.tage}
                         </Text>
-                        <Text style={styles.zahlBoxLabel}>Tage</Text>
+                        <Text style={styles.zahlBoxLabel}>{f.frist!.tage < 0 ? 'fällig' : 'Tage'}</Text>
                       </View>
                       <View style={{ flex: 1, minWidth: 0 }}>
                         <Text style={styles.zeileTyp} numberOfLines={1}>{f.brief.analyse.brieftyp}</Text>

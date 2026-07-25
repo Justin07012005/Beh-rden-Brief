@@ -144,7 +144,7 @@ const styles = StyleSheet.create({
     height: 56,
     borderRadius: 28,
     marginTop: -18,
-    backgroundColor: farben.primaer,
+    backgroundColor: farben.primaerFuellung,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 3,

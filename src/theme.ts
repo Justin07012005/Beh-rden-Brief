@@ -5,31 +5,34 @@
  * - Große Touch-Targets (min. 56px Höhe)
  */
 export const farben = {
-  // Grundfarben — natives iOS-Vorbild: gruppierter System-Hintergrund,
-  // Inhalte als weiße Karten ohne Rahmen und Schatten (wie Einstellungen/Health)
-  hintergrund: '#F2F2F7',
-  flaeche: '#FFFFFF',
-  flaecheSekundaer: '#E9E9EB', // "graue Taste" nach Apple-Art (statt Umrandung)
-  primaer: '#007AFF',      // Apple-System-Blau (Tint für Buttons, Icons, Links)
-  primaerText: '#FFFFFF',
-  text: '#1A202C',
-  textSekundaer: '#4A5568',
-  textTertiaer: '#AEAEB2',  // z. B. Chevrons (iOS systemGray2)
-  rand: '#E2E2E7',
-  // Dezente Hervorhebung für DIE Kernaussage (leichter Blau-Tint)
-  hervorhebung: '#EAF3FF',
-  hervorhebungRand: '#D4E6FB',
+  // Warme, ruhige Palette nach dem Claude-Design-Entwurf ("Postklar/Classical")
+  // und passend zur Website: Papier-Beige, Gold-Akzent, dunkle Tinte.
+  // Gut lesbar (hoher Kontrast bei Fließtext), nur die Schrift bleibt
+  // die klare System-Schrift statt der dünnen Serifenschrift.
+  hintergrund: '#F1EFE9',      // warmes Off-White (Grund)
+  flaeche: '#FBFAF6',          // warme, fast weiße Karten
+  flaecheSekundaer: '#EAE7E0', // gedämpfte Fläche (graue Taste)
+  primaer: '#B68235',          // Gold-Akzent (Icons, aktive Tabs, Rahmen, Punkte)
+  primaerFuellung: '#7D5411',  // dunkles Bronze — Hintergrund gefüllter Buttons (weiße Schrift lesbar)
+  primaerText: '#FBF7EF',      // warmes Weiß (Text auf gefüllten Buttons)
+  text: '#201F1D',             // dunkle Tinte
+  textSekundaer: '#6B675E',    // warmes Grau (wie --grau der Website)
+  textTertiaer: '#A8A29A',     // helles warmes Grau (Chevrons)
+  rand: '#E2DED6',             // warme Trennlinie
+  // Dezente Gold-Hervorhebung (z. B. aktive Filter-Chips)
+  hervorhebung: '#F7EFE0',
+  hervorhebungRand: '#E9D8BC',
 
-  // Dringlichkeits-Ampel: frische Signalfarben in Apples "zugänglichen"
-  // Varianten — kräftig, aber als Text auf Weiß noch gut lesbar (WCAG)
-  ampelRot: '#D70015',
-  ampelGelb: '#C25400',
-  ampelGruen: '#1E7E34',
-  ampelRotHintergrund: '#FFEAE8',
-  ampelGelbHintergrund: '#FFF1E0',
-  ampelGruenHintergrund: '#E7F6EB',
+  // Dringlichkeits-Ampel in den warmen Design-Tönen — als Text auf hellem
+  // Tint gut lesbar (WCAG): Backstein-Rot, Bronze-Gold, Salbei-Grün.
+  ampelRot: '#A23B2B',
+  ampelGelb: '#8A5E14',
+  ampelGruen: '#3F5A4C',
+  ampelRotHintergrund: '#F5E9E5',
+  ampelGelbHintergrund: '#F5EEDF',
+  ampelGruenHintergrund: '#E8EFEA',
 
-  fehler: '#D70015',
+  fehler: '#A23B2B',
 };
 
 export const schrift = {
