@@ -26,6 +26,55 @@ export function tageBis(datumIso: string): number {
   return Math.round((ziel.getTime() - heute.getTime()) / 86400000);
 }
 
+/** Die dringendste anstehende Frist/Termin eines Briefs (oder null). */
+export interface NaechsteFrist {
+  /** Ganze Tage bis zum Datum (negativ = vergangen). */
+  tage: number;
+  /** ISO-Datum JJJJ-MM-TT. */
+  datumIso: string;
+  /** "Frist" oder "Termin". */
+  label: string;
+  /** Was bis dahin zu tun ist (bei Fristen), sonst null. */
+  aktion: string | null;
+}
+
+/**
+ * Liefert das nächste anstehende Datum (Frist ODER Termin) — für die
+ * Fristen-Übersicht (Countdown, Sortierung). null = kein Datum im Brief.
+ */
+export function naechsteFrist(analyse: BriefAnalyse): NaechsteFrist | null {
+  const kandidaten: NaechsteFrist[] = [];
+  if (analyse.frist) {
+    kandidaten.push({
+      tage: tageBis(analyse.frist.datum),
+      datumIso: analyse.frist.datum,
+      label: 'Frist',
+      aktion: analyse.frist.aktion,
+    });
+  }
+  if (analyse.termin) {
+    kandidaten.push({
+      tage: tageBis(analyse.termin.datum),
+      datumIso: analyse.termin.datum,
+      label: 'Termin',
+      aktion: null,
+    });
+  }
+  if (kandidaten.length === 0) return null;
+  return kandidaten.reduce((a, b) => (a.tage <= b.tage ? a : b));
+}
+
+/** Datum lesbar formatieren: "27. Juli 2026". */
+export function formatiereLangDatum(datumIso: string): string {
+  const d = new Date(`${datumIso}T00:00:00`);
+  if (isNaN(d.getTime())) return datumIso;
+  const monate = [
+    'Januar', 'Februar', 'März', 'April', 'Mai', 'Juni',
+    'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember',
+  ];
+  return `${d.getDate()}. ${monate[d.getMonth()]} ${d.getFullYear()}`;
+}
+
 export function berechneAmpel(analyse: BriefAnalyse): AmpelStatus {
   const daten: { tage: number; label: string }[] = [];
   if (analyse.frist) {

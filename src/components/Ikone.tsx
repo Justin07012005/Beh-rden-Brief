@@ -27,7 +27,12 @@ export type IkonenName =
   | 'warnung'
   | 'wecker'
   | 'info'
-  | 'funken';
+  | 'funken'
+  | 'uhr'
+  | 'archiv'
+  | 'schloss'
+  | 'lupe'
+  | 'pfeilLinks';
 
 // `as const` hält die Namen als Literal-Typen — so prüft TypeScript gegen
 // die offizielle SF-Symbol-/Material-Namensliste von expo-symbols
@@ -52,6 +57,11 @@ const NAMEN = {
   wecker: { ios: 'alarm.fill', android: 'alarm' },
   info: { ios: 'info.circle.fill', android: 'info' },
   funken: { ios: 'wand.and.stars', android: 'auto_awesome' },
+  uhr: { ios: 'clock.fill', android: 'schedule' },
+  archiv: { ios: 'archivebox.fill', android: 'inventory_2' },
+  schloss: { ios: 'lock.fill', android: 'lock' },
+  lupe: { ios: 'magnifyingglass', android: 'search' },
+  pfeilLinks: { ios: 'chevron.left', android: 'chevron_left' },
 } as const;
 
 interface Props {

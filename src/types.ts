@@ -104,9 +104,16 @@ export const SPRACHEN: Sprache[] = [
   { code: 'pl', name: 'Polnisch', eigenname: 'Polski' },
 ];
 
-/** Navigation: Parameter aller Screens. */
+/** Untere Tab-Leiste: Fristen-Übersicht · Scannen · Archiv. */
+export type HauptTabParamList = {
+  Fristen: undefined;
+  ScanTab: undefined;
+  Archiv: undefined;
+};
+
+/** Navigation: Root-Stack mit Tab-Leiste + darüber liegenden Detail-Screens. */
 export type RootStackParamList = {
-  Home: undefined;
+  Tabs: undefined;
   Consent: undefined;
   Scan: undefined;
   Analyse: { briefId: string };
