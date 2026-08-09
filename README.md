@@ -76,3 +76,4 @@ valide — kein fragiles Text-Parsing.
 
 Diese App ersetzt keine Rechtsberatung. Bei rechtlich relevanten Antworten
 (z. B. Widerspruch) Beratungsstelle oder Anwalt hinzuziehen.
+# Beh-rden-Brief
