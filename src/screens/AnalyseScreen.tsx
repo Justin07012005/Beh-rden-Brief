@@ -1,8 +1,10 @@
 /**
- * Ergebnis-Ansicht: Ampel, einfache Erklärung, Übersetzung, Fachbegriffe,
- * Frist/Termin mit Kalender-Export, Checkliste und Antwort-Einstieg.
+ * Brief-Detail ("Ihr Brief erklärt") — Layout nach dem Claude-Design-Entwurf:
+ * große Frist-Karte mit Countdown oben, dann "Das ist passiert",
+ * "Das müssen Sie tun", schwere Wörter und der Einstieg zur Antwort.
+ * Alle Funktionen bleiben: Übersetzung, Vorlesen, Kalender, Löschen.
  */
-import React, { useState } from 'react';
+import React, { useLayoutEffect, useState } from 'react';
 import {
   Alert,
   Modal,
@@ -19,9 +21,7 @@ import { useAppStore } from '../store/useAppStore';
 import { uebersetzeAnalyse } from '../services/uebersetzung';
 import { ClaudeFehler } from '../services/claudeClient';
 import { terminZumKalender } from '../services/kalender';
-import { formatiereDatum } from '../services/erinnerungen';
-import { berechneAmpel } from '../utils/ampel';
-import { Ampel } from '../components/Ampel';
+import { berechneAmpel, naechsteFrist, formatiereLangDatum } from '../utils/ampel';
 import { GrossButton } from '../components/GrossButton';
 import { Ikone } from '../components/Ikone';
 import { farben, schrift, abstand, TOUCH_TARGET } from '../theme';
@@ -29,6 +29,12 @@ import { farben, schrift, abstand, TOUCH_TARGET } from '../theme';
 type Props = NativeStackScreenProps<RootStackParamList, 'Analyse'>;
 
 const DEUTSCH: Sprache = { code: 'de', name: 'Deutsch', eigenname: 'Deutsch' };
+
+const STUFEN_LABEL: Record<string, string> = {
+  rot: 'Dringend',
+  gelb: 'Handlung nötig',
+  gruen: 'Zur Kenntnis',
+};
 
 export function AnalyseScreen({ navigation, route }: Props) {
   const brief = useAppStore((s) => s.briefe.find((b) => b.id === route.params.briefId));
@@ -41,8 +47,12 @@ export function AnalyseScreen({ navigation, route }: Props) {
   const [liest, setLiest] = useState(false);
   const [erledigt, setErledigt] = useState<Record<number, boolean>>({});
 
+  // Header-Titel = Brieftyp (wie im Entwurf), sobald der Brief geladen ist
+  useLayoutEffect(() => {
+    if (brief) navigation.setOptions({ title: brief.analyse.brieftyp });
+  }, [navigation, brief]);
+
   if (!brief) {
-    // Brief wurde gelöscht — zurück zum Start
     return (
       <View style={styles.zentriert}>
         <Text style={styles.text}>Brief nicht gefunden.</Text>
@@ -52,6 +62,8 @@ export function AnalyseScreen({ navigation, route }: Props) {
 
   const { analyse } = brief;
   const ampel = berechneAmpel(analyse);
+  const frist = naechsteFrist(analyse);
+  const stufenLabel = STUFEN_LABEL[ampel.stufe];
 
   // Anzeige-Inhalte: deutsch oder aus dem Übersetzungs-Cache
   const cache = sprache.code !== 'de' ? brief.uebersetzungen[sprache.code] : undefined;
@@ -64,7 +76,6 @@ export function AnalyseScreen({ navigation, route }: Props) {
     setSprachwahlOffen(false);
     setSprache(neu);
     if (neu.code === 'de' || brief.uebersetzungen[neu.code]) return;
-    // Noch nicht im Cache -> einmalig übersetzen
     setUebersetzt(true);
     try {
       const u = await uebersetzeAnalyse(analyse, neu);
@@ -80,7 +91,6 @@ export function AnalyseScreen({ navigation, route }: Props) {
     }
   };
 
-  /** Vorlese-Funktion für Menschen mit Leseschwäche. */
   const vorlesen = () => {
     if (liest) {
       Speech.stop();
@@ -123,135 +133,169 @@ export function AnalyseScreen({ navigation, route }: Props) {
   };
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={{ padding: abstand.m }}>
-      {/* Dringlichkeits-Ampel ganz oben */}
-      <Ampel status={ampel} />
-
-      {/* Sprach-Auswahl */}
-      <Pressable
-        style={styles.sprachButton}
-        onPress={() => setSprachwahlOffen(true)}
-        accessibilityRole="button"
-        accessibilityLabel={`Sprache ändern. Aktuell: ${sprache.name}`}
-      >
-        <View style={styles.sprachZeileInhalt}>
-          <Ikone name="globus" groesse={20} farbe={farben.primaer} />
-          <Text style={styles.sprachButtonText}>
-            {sprache.eigenname} {uebersetzt ? ' (übersetzt…)' : ''}
-          </Text>
-          <Ikone name="pfeilRechts" groesse={16} farbe={farben.textTertiaer} />
-        </View>
-      </Pressable>
-
-      {/* Kernaussage: Was will das Amt von mir? */}
-      <View style={styles.karteWichtig}>
-        <Text style={styles.abschnittTitel}>Was will das Amt von mir?</Text>
-        <Text style={styles.kernaussage}>{kernaussage}</Text>
-        <View style={{ marginTop: abstand.s }}>
-          <GrossButton
-            titel={liest ? 'Vorlesen stoppen' : 'Vorlesen'}
-            ikone={liest ? 'stopp' : 'vorlesen'}
-            variante="sekundaer"
-            onPress={vorlesen}
-          />
-        </View>
-      </View>
-
-      {/* Frist / Termin */}
-      {(analyse.frist || analyse.termin) && (
-        <View
-          style={[
-            styles.karte,
-            { backgroundColor: ampel.hintergrund, borderLeftWidth: 6, borderLeftColor: ampel.farbe },
-          ]}
-        >
-          {analyse.frist && (
-            <Text style={styles.fristText}>
-              Frist: <Text style={styles.fett}>{formatiereDatum(analyse.frist.datum)}</Text>
-              {'\n'}
-              {analyse.frist.aktion}
+    <ScrollView style={styles.container} contentContainerStyle={{ padding: abstand.m, paddingBottom: abstand.xl }}>
+      {/* ── Frist-Karte mit Countdown ── */}
+      {frist ? (
+        <View style={[styles.fristKarte, { backgroundColor: ampel.hintergrund, borderColor: ampel.farbe }]}>
+          <View style={styles.fristKopf}>
+            <Ikone name="uhr" groesse={16} farbe={ampel.farbe} />
+            <Text style={[styles.fristKicker, { color: ampel.farbe }]}>
+              {frist.label} · {stufenLabel}
             </Text>
+          </View>
+          <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 12 }}>
+            <Text style={[styles.grosseZahl, { color: ampel.farbe }]}>
+              {frist.tage < 0 ? '!' : frist.tage}
+            </Text>
+            <View style={{ paddingBottom: 8 }}>
+              <Text style={[styles.zahlEinheit, { color: ampel.farbe }]}>
+                {frist.tage < 0 ? 'überfällig' : 'Tage'}
+              </Text>
+              <Text style={styles.zahlUnter}>{frist.tage < 0 ? '' : 'verbleiben'}</Text>
+            </View>
+          </View>
+          <View style={styles.trenner} />
+          <View style={styles.datenZeile}>
+            <Text style={styles.datenLabel}>{frist.label === 'Termin' ? 'Termin am' : 'Fällig am'}</Text>
+            <Text style={styles.datenWert}>{formatiereLangDatum(frist.datumIso)}</Text>
+          </View>
+          {analyse.frist?.aktion && (
+            <View style={styles.datenZeile}>
+              <Text style={styles.datenLabel}>Zu tun</Text>
+              <Text style={[styles.datenWert, { color: ampel.farbe, flex: 1, textAlign: 'right' }]}>
+                {analyse.frist.aktion}
+              </Text>
+            </View>
           )}
           {analyse.termin && (
             <>
-              <Text style={styles.fristText}>
-                Termin: <Text style={styles.fett}>{formatiereDatum(analyse.termin.datum)}</Text>
-                {analyse.termin.uhrzeit ? ` um ${analyse.termin.uhrzeit} Uhr` : ''}
-                {analyse.termin.ort ? `\nOrt: ${analyse.termin.ort}` : ''}
-              </Text>
-              <GrossButton
-                titel="Termin zum Kalender hinzufügen"
-                ikone="kalender"
-                variante="sekundaer"
-                onPress={kalenderExport}
-              />
+              {(analyse.termin.uhrzeit || analyse.termin.ort) && (
+                <View style={styles.datenZeile}>
+                  <Text style={styles.datenLabel}>Wo & wann</Text>
+                  <Text style={[styles.datenWert, { flex: 1, textAlign: 'right' }]}>
+                    {analyse.termin.uhrzeit ? `${analyse.termin.uhrzeit} Uhr` : ''}
+                    {analyse.termin.uhrzeit && analyse.termin.ort ? ' · ' : ''}
+                    {analyse.termin.ort ?? ''}
+                  </Text>
+                </View>
+              )}
+              <View style={{ marginTop: abstand.s }}>
+                <GrossButton
+                  titel="Termin zum Kalender hinzufügen"
+                  ikone="kalender"
+                  variante="sekundaer"
+                  onPress={kalenderExport}
+                />
+              </View>
             </>
           )}
         </View>
+      ) : (
+        <View style={styles.keineFrist}>
+          <Ikone name="info" groesse={20} farbe={farben.ampelGruen} />
+          <View style={{ flex: 1 }}>
+            <Text style={styles.keineFristTitel}>Keine Frist</Text>
+            <Text style={styles.keineFristText}>Dieser Brief ist nur zur Kenntnis. Sie müssen nichts tun.</Text>
+          </View>
+        </View>
       )}
 
-      {/* Ausführliche Erklärung */}
-      <View style={styles.karte}>
-        <Text style={styles.abschnittTitel}>Erklärung in einfacher Sprache</Text>
-        <Text style={styles.text}>{erklaerung}</Text>
+      {/* ── Steuerung: Sprache + Vorlesen ── */}
+      <View style={styles.werkzeugZeile}>
+        <Pressable
+          style={styles.werkzeug}
+          onPress={() => setSprachwahlOffen(true)}
+          accessibilityRole="button"
+          accessibilityLabel={`Sprache ändern. Aktuell: ${sprache.name}`}
+        >
+          <Ikone name="globus" groesse={18} farbe={farben.primaer} />
+          <Text style={styles.werkzeugText} numberOfLines={1}>
+            {uebersetzt ? 'übersetzt…' : sprache.eigenname}
+          </Text>
+        </Pressable>
+        <Pressable style={styles.werkzeug} onPress={vorlesen} accessibilityRole="button">
+          <Ikone name={liest ? 'stopp' : 'vorlesen'} groesse={18} farbe={farben.primaer} />
+          <Text style={styles.werkzeugText}>{liest ? 'Stopp' : 'Vorlesen'}</Text>
+        </Pressable>
       </View>
 
-      {/* Checkliste */}
+      {/* ── Das ist passiert ── */}
+      <Text style={styles.kicker}>Das ist passiert</Text>
+      <Text style={styles.kernaussage}>{kernaussage}</Text>
+      <Text style={styles.erklaerung}>{erklaerung}</Text>
+
+      {/* ── Das müssen Sie tun ── */}
       {checkliste.length > 0 && (
-        <View style={styles.karte}>
-          <Text style={styles.abschnittTitel}>Das müssen Sie tun</Text>
-          {checkliste.map((punkt, i) => (
-            <Pressable
-              key={i}
-              style={styles.checkZeile}
-              onPress={() => setErledigt((e) => ({ ...e, [i]: !e[i] }))}
-              accessibilityRole="checkbox"
-              accessibilityState={{ checked: !!erledigt[i] }}
-            >
-              <Ikone
-                name={erledigt[i] ? 'checkAn' : 'checkAus'}
-                groesse={26}
-                farbe={erledigt[i] ? farben.ampelGruen : farben.textTertiaer}
-              />
-              <Text style={[styles.text, { flex: 1 }, erledigt[i] && styles.durchgestrichen]}>
-                {punkt}
-              </Text>
-            </Pressable>
-          ))}
-        </View>
+        <>
+          <View style={styles.dünnerTrenner} />
+          <Text style={styles.kicker}>Das müssen Sie tun</Text>
+          <View style={{ gap: abstand.s }}>
+            {checkliste.map((punkt, i) => {
+              const fertig = !!erledigt[i];
+              return (
+                <Pressable
+                  key={i}
+                  style={styles.todoZeile}
+                  onPress={() => setErledigt((e) => ({ ...e, [i]: !e[i] }))}
+                  accessibilityRole="checkbox"
+                  accessibilityState={{ checked: fertig }}
+                >
+                  <View style={[styles.todoKreis, fertig && styles.todoKreisFertig]}>
+                    {fertig ? (
+                      <Ikone name="checkAn" groesse={16} farbe={farben.primaerText} />
+                    ) : (
+                      <Text style={styles.todoNummer}>{i + 1}</Text>
+                    )}
+                  </View>
+                  <Text style={[styles.todoText, fertig && styles.durchgestrichen]}>{punkt}</Text>
+                </Pressable>
+              );
+            })}
+          </View>
+        </>
       )}
 
-      {/* Fachbegriffe */}
+      {/* ── Schwere Wörter ── */}
       {fachbegriffe.length > 0 && (
-        <View style={styles.karte}>
-          <Text style={styles.abschnittTitel}>Schwere Wörter erklärt</Text>
-          {fachbegriffe.map((f, i) => (
-            <View key={i} style={styles.begriffBlock}>
-              <Text style={styles.begriff}>{f.begriff}</Text>
-              <Text style={styles.text}>{f.erklaerung}</Text>
-            </View>
-          ))}
+        <>
+          <View style={styles.dünnerTrenner} />
+          <Text style={styles.kicker}>Schwere Wörter erklärt</Text>
+          <View style={{ gap: abstand.s }}>
+            {fachbegriffe.map((f, i) => (
+              <View key={i} style={styles.begriffKarte}>
+                <Text style={styles.begriff}>{f.begriff}</Text>
+                <Text style={styles.begriffText}>{f.erklaerung}</Text>
+              </View>
+            ))}
+          </View>
+        </>
+      )}
+
+      {/* ── Antwort ── */}
+      {analyse.antwort_noetig && (
+        <View style={{ marginTop: abstand.l }}>
+          <GrossButton
+            titel="Antwort erstellen"
+            ikone="stift"
+            onPress={() => navigation.navigate('Antwort', { briefId: brief.id })}
+          />
         </View>
       )}
 
-      {/* Antwort erstellen */}
-      {analyse.antwort_noetig && (
-        <GrossButton
-          titel="Antwort erstellen"
-          ikone="stift"
-          onPress={() => navigation.navigate('Antwort', { briefId: brief.id })}
-        />
-      )}
-
-      <View style={{ height: abstand.m }} />
-      <GrossButton titel="Brief löschen" ikone="muell" variante="gefahr" onPress={loeschen} />
-      <View style={{ height: abstand.xl }} />
+      {/* ── Datenschutz-Fuß + Löschen ── */}
+      <View style={styles.schutzZeile}>
+        <Ikone name="schloss" groesse={13} farbe={farben.textTertiaer} />
+        <Text style={styles.schutzText}>Auf Ihrem Gerät ausgewertet · verschlüsselt gespeichert</Text>
+      </View>
+      <View style={{ marginTop: abstand.m }}>
+        <GrossButton titel="Brief löschen" ikone="muell" variante="gefahr" onPress={loeschen} />
+      </View>
 
       {/* Sprach-Auswahl-Dialog */}
       <Modal visible={sprachwahlOffen} transparent animationType="fade">
         <Pressable style={styles.modalHintergrund} onPress={() => setSprachwahlOffen(false)}>
           <View style={styles.modalKarte}>
-            <Text style={styles.abschnittTitel}>Sprache wählen</Text>
+            <Text style={styles.modalTitel}>Sprache wählen</Text>
             <ScrollView>
               {[DEUTSCH, ...SPRACHEN].map((s) => (
                 <Pressable
@@ -263,7 +307,7 @@ export function AnalyseScreen({ navigation, route }: Props) {
                   <Text
                     style={[
                       styles.sprachZeileText,
-                      s.code === sprache.code && { fontWeight: '700', color: farben.primaer },
+                      s.code === sprache.code && { fontWeight: '700', color: farben.primaerFuellung },
                     ]}
                   >
                     {s.eigenname} {s.code !== 'de' ? `(${s.name})` : ''}
@@ -282,64 +326,68 @@ export function AnalyseScreen({ navigation, route }: Props) {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: farben.hintergrund },
   zentriert: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  karte: {
-    backgroundColor: farben.flaeche,
-    borderRadius: 12,
-    padding: abstand.m,
-    marginTop: abstand.m,
-    gap: abstand.s,
+
+  // Frist-Karte
+  fristKarte: { borderRadius: 16, borderWidth: 1, padding: abstand.l },
+  fristKopf: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 10 },
+  fristKicker: { fontSize: 12, letterSpacing: 0.6, textTransform: 'uppercase', fontWeight: '700' },
+  grosseZahl: { fontSize: 64, lineHeight: 64, fontWeight: '800', fontVariant: ['tabular-nums'] },
+  zahlEinheit: { fontSize: 22, fontWeight: '700', lineHeight: 24 },
+  zahlUnter: { fontSize: 13, color: farben.textSekundaer },
+  trenner: { height: 1, backgroundColor: farben.rand, marginVertical: 14 },
+  datenZeile: { flexDirection: 'row', justifyContent: 'space-between', gap: 12, marginTop: 5 },
+  datenLabel: { fontSize: schrift.klein, color: farben.textSekundaer },
+  datenWert: { fontSize: schrift.klein, fontWeight: '700', color: farben.text },
+
+  keineFrist: {
+    flexDirection: 'row', gap: abstand.s, alignItems: 'center',
+    backgroundColor: farben.ampelGruenHintergrund, borderRadius: 12,
+    borderLeftWidth: 4, borderLeftColor: farben.ampelGruen, padding: abstand.m,
   },
-  // DIE Antwort der App — dezent im Marken-Tint hervorgehoben
-  karteWichtig: {
-    backgroundColor: farben.hervorhebung,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: farben.hervorhebungRand,
-    padding: abstand.m,
-    marginTop: abstand.m,
+  keineFristTitel: { fontSize: schrift.basis, fontWeight: '700', color: farben.text },
+  keineFristText: { fontSize: schrift.klein, color: farben.textSekundaer, marginTop: 2 },
+
+  // Werkzeuge
+  werkzeugZeile: { flexDirection: 'row', gap: abstand.s, marginTop: abstand.m },
+  werkzeug: {
+    flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 7,
+    backgroundColor: farben.flaeche, borderRadius: 12, minHeight: 48, paddingHorizontal: abstand.s,
   },
-  abschnittTitel: {
-    fontSize: schrift.gross,
-    fontWeight: '700',
-    color: farben.primaer,
-    marginBottom: abstand.xs,
+  werkzeugText: { fontSize: schrift.klein, fontWeight: '600', color: farben.primaerFuellung },
+
+  kicker: {
+    fontSize: 12, letterSpacing: 1.1, textTransform: 'uppercase',
+    color: farben.primaer, fontWeight: '700', marginTop: abstand.l, marginBottom: abstand.xs,
   },
-  kernaussage: { fontSize: schrift.gross, color: farben.text, lineHeight: 30, fontWeight: '500' },
-  text: { fontSize: schrift.basis, color: farben.text, lineHeight: 27 },
-  fett: { fontWeight: '700' },
-  fristText: { fontSize: schrift.basis, color: farben.text, lineHeight: 28 },
-  checkZeile: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: abstand.s,
-    minHeight: 44,
-    paddingVertical: 4,
+  kernaussage: { fontSize: schrift.gross, color: farben.text, lineHeight: 29, fontWeight: '600' },
+  erklaerung: { fontSize: schrift.basis, color: farben.textSekundaer, lineHeight: 27, marginTop: abstand.s },
+  dünnerTrenner: { height: 1, backgroundColor: farben.rand, marginTop: abstand.l },
+
+  // To-do
+  todoZeile: { flexDirection: 'row', gap: abstand.s, alignItems: 'flex-start', minHeight: 40 },
+  todoKreis: {
+    width: 28, height: 28, borderRadius: 14, borderWidth: 1.5, borderColor: farben.primaer,
+    alignItems: 'center', justifyContent: 'center', marginTop: 1,
   },
+  todoKreisFertig: { backgroundColor: farben.ampelGruen, borderColor: farben.ampelGruen },
+  todoNummer: { fontSize: schrift.klein, fontWeight: '700', color: farben.primaerFuellung, fontVariant: ['tabular-nums'] },
+  todoText: { flex: 1, fontSize: schrift.basis, color: farben.text, lineHeight: 25, paddingTop: 3 },
   durchgestrichen: { textDecorationLine: 'line-through', color: farben.textSekundaer },
-  begriffBlock: { marginBottom: abstand.s },
-  begriff: { fontSize: schrift.basis, fontWeight: '700', color: farben.text },
-  sprachButton: {
-    marginTop: abstand.m,
-    minHeight: TOUCH_TARGET,
-    borderRadius: 12,
-    backgroundColor: farben.flaeche,
-    justifyContent: 'center',
-    paddingHorizontal: abstand.m,
-  },
-  sprachZeileInhalt: { flexDirection: 'row', alignItems: 'center', gap: abstand.s },
-  sprachButtonText: { flex: 1, fontSize: schrift.basis, color: farben.text, fontWeight: '600' },
-  modalHintergrund: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    justifyContent: 'center',
-    padding: abstand.l,
-  },
-  modalKarte: {
-    backgroundColor: farben.flaeche,
-    borderRadius: 14,
-    padding: abstand.m,
-    maxHeight: '75%',
-  },
+
+  // Fachbegriffe
+  begriffKarte: { backgroundColor: farben.flaeche, borderRadius: 12, padding: abstand.m },
+  begriff: { fontSize: schrift.basis, fontWeight: '700', color: farben.text, marginBottom: 3 },
+  begriffText: { fontSize: schrift.klein, color: farben.textSekundaer, lineHeight: 23 },
+
+  schutzZeile: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, marginTop: abstand.l },
+  schutzText: { fontSize: 11.5, color: farben.textTertiaer },
+
+  text: { fontSize: schrift.basis, color: farben.text, lineHeight: 27 },
+
+  // Modal
+  modalHintergrund: { flex: 1, backgroundColor: 'rgba(0,0,0,0.45)', justifyContent: 'center', padding: abstand.l },
+  modalKarte: { backgroundColor: farben.flaeche, borderRadius: 14, padding: abstand.m, maxHeight: '75%' },
+  modalTitel: { fontSize: schrift.gross, fontWeight: '700', color: farben.text, marginBottom: abstand.xs },
   sprachZeile: { minHeight: TOUCH_TARGET, justifyContent: 'center' },
   sprachZeileText: { fontSize: schrift.gross, color: farben.text },
 });
