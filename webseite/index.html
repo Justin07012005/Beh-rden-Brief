@@ -286,6 +286,18 @@
     }
     .wl-input::placeholder { color: #9a958a; }
     .wl-btn { width: 100%; cursor: pointer; text-align: center; font-family: inherit; }
+
+    /* Ratgeber-Abschnitt */
+    .rat-liste { display: grid; gap: 11px; margin-top: 4px; }
+    .rat-karte {
+      display: block; background: #fff; border: 1px solid rgba(33, 33, 29, 0.28);
+      padding: 15px 18px; text-decoration: none; color: var(--tinte);
+      box-shadow: 3px 4px 0 rgba(33, 33, 29, 0.08);
+    }
+    .rat-karte b { display: block; font-size: 18px; color: var(--amtsblau); margin-bottom: 3px; }
+    .rat-karte span { font-size: 14.5px; color: var(--grau); }
+    .rat-alle { margin-top: 14px; font-size: 16px; }
+    .rat-alle a { color: var(--amtsblau); font-weight: 700; }
   </style>
   <script type="application/ld+json">
   {
@@ -523,6 +535,33 @@
         <summary>Kommt die App auch für Android?</summary>
         <p>Ja, Android ist geplant. Das iPhone kommt zuerst. Auf der Warteliste erfahren Sie es als Erste.</p>
       </details>
+    </section>
+
+    <section>
+      <h2><span class="nr">§ 7</span> Ratgeber</h2>
+      <p style="margin-bottom: 16px;">
+        Häufige Briefe verständlich erklärt — welche Frist gilt und was Sie tun
+        müssen. In einfacher Sprache:
+      </p>
+      <div class="rat-liste">
+        <a class="rat-karte" href="ratgeber/jobcenter-mitwirkungsaufforderung">
+          <b>Mitwirkungsaufforderung vom Jobcenter</b>
+          <span>Welche Unterlagen Sie brauchen und was passiert, wenn Sie nicht reagieren.</span>
+        </a>
+        <a class="rat-karte" href="ratgeber/steuerbescheid-finanzamt-einspruch">
+          <b>Steuerbescheid vom Finanzamt</b>
+          <span>Nachzahlung erkennen, den Bescheid prüfen und fristgerecht Einspruch einlegen.</span>
+        </a>
+        <a class="rat-karte" href="ratgeber/auslaenderbehoerde-termin-aufenthaltstitel">
+          <b>Brief von der Ausländerbehörde</b>
+          <span>Termin, welche Unterlagen Sie mitbringen und wie Sie Ihren Aufenthaltstitel verlängern.</span>
+        </a>
+        <a class="rat-karte" href="ratgeber/widerspruch-einlegen">
+          <b>Widerspruch einlegen — so geht's</b>
+          <span>Welche Frist gilt und wie Sie einen Widerspruch schreiben — mit Muster-Text.</span>
+        </a>
+      </div>
+      <p class="rat-alle"><a href="ratgeber/">Alle Ratgeber ansehen →</a></p>
     </section>
 
     <div class="grussformel">
