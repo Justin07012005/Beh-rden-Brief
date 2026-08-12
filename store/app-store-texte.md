@@ -107,8 +107,8 @@ ohne Kauf möglich.
 
 ## URLs (live, für die Formularfelder in App Store Connect)
 
-- **Support-URL:** https://behoerdenklar.pages.dev
-- **Datenschutz-URL:** https://behoerdenklar.pages.dev/datenschutz
+- **Support-URL:** https://behoerdenklar.de
+- **Datenschutz-URL:** https://behoerdenklar.de/datenschutz
 - Kontakt-E-Mail: behoerdenbriefhelfer@gmail.com
 - Quelldateien: `webseite/` — neu deployen mit
   `npx wrangler pages deploy ../webseite --project-name behoerdenklar` (aus proxy/)

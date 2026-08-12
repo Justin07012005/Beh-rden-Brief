@@ -179,7 +179,7 @@ export function EinstellungenScreen({ navigation }: Props) {
       ) : (
         <>
           <Text style={styles.hinweis}>
-            Sie haben sich auf behoerdenklar.pages.dev angemeldet? Lösen Sie
+            Sie haben sich auf behoerdenklar.de angemeldet? Lösen Sie
             hier den Code aus Ihrer E-Mail ein.
           </Text>
           <TextInput

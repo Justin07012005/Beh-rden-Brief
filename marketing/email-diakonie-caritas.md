@@ -43,7 +43,7 @@ Tracking und keine Werbung — eine Übersicht liegt als PDF bei. Die ersten
 Analysen sind kostenlos, Vielnutzer zahlen später ein kleines Abo
 (2,99 €/Monat).
 
-Webseite (auch auf Arabisch, Türkisch u. a.): https://behoerdenklar.pages.dev
+Webseite (auch auf Arabisch, Türkisch u. a.): https://behoerdenklar.de
 
 Mit freundlichen Grüßen
 Justin Klein
@@ -84,7 +84,7 @@ Tracking und keine Werbung — eine Übersicht liegt als PDF bei. Die ersten
 Analysen sind kostenlos, Vielnutzer zahlen später ein kleines Abo
 (2,99 €/Monat).
 
-Webseite (auch auf Arabisch, Türkisch u. a.): https://behoerdenklar.pages.dev
+Webseite (auch auf Arabisch, Türkisch u. a.): https://behoerdenklar.de
 
 Mit freundlichen Grüßen
 Justin Klein

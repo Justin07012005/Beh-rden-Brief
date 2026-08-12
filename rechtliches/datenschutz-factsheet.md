@@ -1,7 +1,7 @@
 # BehördenKlar — Datenschutz auf einen Blick
 
 **Für Beratungsstellen, Sozialverbände und Kooperationspartner**
-Stand: 15.07.2026 · Kontakt: behoerdenbriefhelfer@gmail.com · behoerdenklar.pages.dev
+Stand: 15.07.2026 · Kontakt: behoerdenbriefhelfer@gmail.com · behoerdenklar.de
 
 > BehördenKlar hilft Menschen, Behördenbriefe zu verstehen: Brief fotografieren,
 > Erklärung in einfacher Sprache erhalten — mit Fristen, Checkliste und
@@ -59,7 +59,7 @@ nicht bei uns.**
   Beratung — sie ist als *Ergänzung* Ihrer Arbeit gedacht, nicht als Ersatz.
 - **Dieses Dokument ist eine Selbstauskunft**, kein Zertifikat. Die
   vollständige Datenschutzerklärung ist öffentlich:
-  https://behoerdenklar.pages.dev/datenschutz
+  https://behoerdenklar.de/datenschutz
 
 ## Warum das für Ihre Beratungsarbeit interessant ist
 

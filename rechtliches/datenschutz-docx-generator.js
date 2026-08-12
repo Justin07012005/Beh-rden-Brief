@@ -178,7 +178,7 @@ const doc = new Document({
       }),
       new Paragraph({
         spacing: { after: 120 },
-        children: [new TextRun({ text: 'Stand: 15.07.2026   ·   behoerdenbriefhelfer@gmail.com   ·   behoerdenklar.pages.dev', size: 18, color: GRAU, font: FONT })],
+        children: [new TextRun({ text: 'Stand: 15.07.2026   ·   behoerdenbriefhelfer@gmail.com   ·   behoerdenklar.de', size: 18, color: GRAU, font: FONT })],
       }),
       trennlinie(),
 
@@ -235,7 +235,7 @@ const doc = new Document({
       bullet('Die KI-Analyse läuft bei Anthropic (USA), auf Grundlage des EU-U.S. Data Privacy Framework bzw. EU-Standardvertragsklauseln. Eine Verarbeitung in der EU ist beim Anbieter derzeit nicht verfügbar; als Ausbaupfad prüfen wir den Betrieb über EU-Rechenzentren (AWS Frankfurt).', { fett: 'Verarbeitung in den USA:' }),
       bullet('Anthropic hält Anfragen bis zu 30 Tage zur Missbrauchserkennung vor — danach automatische Löschung. Wir sagen das offen, statt „Ihre Daten verlassen nie das Handy" zu behaupten.', { fett: '30-Tage-Fenster:' }),
       bullet('Die App erklärt Briefe, ersetzt aber keine Beratung — sie ist als Ergänzung Ihrer Arbeit gedacht, nicht als Ersatz.', { fett: 'Keine Rechtsberatung:' }),
-      bullet('Dieses Dokument ist eine Selbstauskunft, kein Zertifikat. Die vollständige Datenschutzerklärung ist öffentlich unter behoerdenklar.pages.dev/datenschutz.', { fett: 'Transparenz:' }),
+      bullet('Dieses Dokument ist eine Selbstauskunft, kein Zertifikat. Die vollständige Datenschutzerklärung ist öffentlich unter behoerdenklar.de/datenschutz.', { fett: 'Transparenz:' }),
 
       // ===== Nutzen für die Beratung =====
       h1('Warum das für Ihre Beratungsarbeit interessant ist'),
@@ -264,7 +264,7 @@ const doc = new Document({
               new TextRun({ text: 'Wir zeigen die App gern persönlich und beantworten jede Datenschutz-Rückfrage.', size: 21, color: TINTE, font: FONT }),
             ] }),
             new Paragraph({ spacing: { after: 0 }, children: [
-              new TextRun({ text: '📧  behoerdenbriefhelfer@gmail.com      🌐  behoerdenklar.pages.dev', size: 21, color: TINTE, font: FONT, bold: true }),
+              new TextRun({ text: '📧  behoerdenbriefhelfer@gmail.com      🌐  behoerdenklar.de', size: 21, color: TINTE, font: FONT, bold: true }),
             ] }),
           ],
         })] })],

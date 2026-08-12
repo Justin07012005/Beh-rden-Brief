@@ -61,8 +61,16 @@ function fehler(status: number, typ: string, meldung: string): Response {
 //  4. IP-Gesamtlimit über 30 Tage (bremst Verlauf-Löscher)
 //  5. Globales Tagesbudget (harter Kosten-Deckel für den Betreiber)
 
-/** Nur die eigene Webseite darf den Demo-Endpunkt aufrufen (CORS). */
-const DEMO_ORIGIN_MUSTER = /^https:\/\/([a-z0-9-]+\.)?behoerdenklar\.pages\.dev$/;
+/**
+ * Nur die eigene Webseite darf den Demo-Endpunkt aufrufen (CORS).
+ * Erlaubt sind:
+ *  - die eigene Domain behoerdenklar.de (mit und ohne www)
+ *  - behoerdenklar.pages.dev inkl. Subdomains — Cloudflare Pages liefert die
+ *    Seite dort weiterhin aus (Vorschau-Deployments wie <hash>.behoerdenklar.pages.dev),
+ *    und ohne diesen Teil wäre die Demo vor jedem Livegang ungetestet.
+ */
+const DEMO_ORIGIN_MUSTER =
+  /^https:\/\/(www\.)?behoerdenklar\.de$|^https:\/\/([a-z0-9-]+\.)?behoerdenklar\.pages\.dev$/;
 
 /** ~5 MB Datei entsprechen ~6,7 Mio. Base64-Zeichen. */
 const DEMO_MAX_BASE64 = 7_000_000;
@@ -134,7 +142,7 @@ const DEMO_SCHEMA = {
 };
 
 function demoCorsHeaders(origin: string | null): Record<string, string> {
-  const erlaubt = origin && DEMO_ORIGIN_MUSTER.test(origin) ? origin : 'https://behoerdenklar.pages.dev';
+  const erlaubt = origin && DEMO_ORIGIN_MUSTER.test(origin) ? origin : 'https://behoerdenklar.de';
   return {
     'access-control-allow-origin': erlaubt,
     'access-control-allow-methods': 'POST, OPTIONS',
