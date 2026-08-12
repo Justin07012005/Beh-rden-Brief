@@ -3,7 +3,7 @@
  * synchronisiert jede Änderung sofort nach AsyncStorage.
  */
 import { create } from 'zustand';
-import { BriefEintrag, Uebersetzung, AntwortTyp } from '../types';
+import { AntwortEntwurfGespeichert, BriefEintrag, Uebersetzung } from '../types';
 import { holeAutoLoeschTage, ladeBriefe, speichereBriefe } from '../services/storage';
 import { filtereAlteBriefe } from '../utils/aufbewahrung';
 
@@ -17,10 +17,7 @@ interface AppState {
   removeBrief: (id: string) => Promise<void>;
   /** Übersetzung in den Cache des Briefs schreiben. */
   setzeUebersetzung: (id: string, sprachCode: string, u: Uebersetzung) => Promise<void>;
-  setzeAntwortEntwurf: (
-    id: string,
-    entwurf: { typ: AntwortTyp; betreff: string; text: string }
-  ) => Promise<void>;
+  setzeAntwortEntwurf: (id: string, entwurf: AntwortEntwurfGespeichert) => Promise<void>;
   leereAlles: () => void;
 }
 

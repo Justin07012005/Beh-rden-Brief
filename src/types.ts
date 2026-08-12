@@ -67,6 +67,15 @@ export interface Uebersetzung {
   fachbegriffe: Fachbegriff[];
 }
 
+/**
+ * Absenderdaten des Nutzers für Antwortbriefe. Bleiben — wie alles andere —
+ * nur lokal auf dem Gerät und ersetzen die Platzhalter [Ihr Name]/[Ihre Adresse].
+ */
+export interface Absender {
+  name: string;
+  adresse: string;
+}
+
 /** Ein gespeicherter Brief im lokalen Archiv. */
 export interface BriefEintrag {
   id: string;
@@ -75,11 +84,19 @@ export interface BriefEintrag {
   analyse: BriefAnalyse;
   /** Cache: Sprachcode -> fertige Übersetzung (spart API-Kosten). */
   uebersetzungen: Record<string, Uebersetzung>;
-  antwortEntwurf?: {
-    typ: AntwortTyp;
-    betreff: string;
-    text: string;
-  };
+  antwortEntwurf?: AntwortEntwurfGespeichert;
+}
+
+/**
+ * Gespeicherter Antwort-Entwurf inkl. der Assistenten-Eingaben, damit der
+ * Nutzer den Assistenten später an derselben Stelle fortsetzen kann.
+ */
+export interface AntwortEntwurfGespeichert {
+  typ: AntwortTyp;
+  betreff: string;
+  text: string;
+  /** Antworten aus Schritt 2, Feld-ID -> Eingabe (siehe data/antwortFelder.ts). */
+  angaben?: Record<string, string>;
 }
 
 /** Eine unterstützte Zielsprache für die Übersetzung. */

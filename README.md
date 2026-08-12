@@ -13,7 +13,12 @@ Behördenbriefe scannen, in einfacher Sprache verstehen, übersetzen und direkt 
   - Checkliste („Diese Unterlagen mitbringen…")
 - 🚦 **Dringlichkeits-Ampel** — lokal berechnet: 🔴 < 7 Tage · 🟡 7–21 Tage · 🟢 keine Frist
 - 🌐 **Übersetzung** in 9 Sprachen (Türkisch, Arabisch, Englisch, Russisch, Ukrainisch, Französisch, Farsi, Rumänisch, Polnisch) — on demand, gecacht
-- ✍️ **Antwort-Generator** — Vorlagen (Terminbestätigung, Verschiebung, Widerspruch, Unterlagen nachreichen, Rückfrage), frei editierbar, PDF-Export
+- ✍️ **Antwort-Assistent** in 3 Schritten — Art wählen (Terminbestätigung,
+  Verschiebung, Widerspruch, Unterlagen nachreichen, Rückfrage) → je Art gezielt
+  Angaben ergänzen → Entwurf prüfen. Frei editierbar (wird laufend gesichert),
+  Warnung vor dem Export, wenn noch Platzhalter offen sind, PDF- und Text-Export.
+  Absenderdaten werden einmal hinterlegt, bleiben verschlüsselt auf dem Gerät und
+  werden erst lokal in den fertigen Brief eingesetzt — nie an die KI übertragen.
 - 🗓️ **Kalender-Export** für Termine, ⏰ **lokale Erinnerungen** 3 + 1 Tage vor Fristen
 - 📖 **Behörden-Glossar** (offline), 🔊 **Vorlese-Funktion**, 📡 **Offline-Hinweis**
 - 🔒 **Datenschutz**: Einwilligung vor erstem Scan, alle Daten nur lokal, „Alles löschen"-Funktion

@@ -10,7 +10,7 @@
  */
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as SecureStore from 'expo-secure-store';
-import { BriefEintrag } from '../types';
+import { Absender, BriefEintrag } from '../types';
 import {
   entschluesseleText,
   loescheArchivSchluessel,
@@ -146,6 +146,38 @@ export async function speichereBriefe(briefe: BriefEintrag[]): Promise<void> {
   );
 }
 
+// ---- Absenderdaten für Antwortbriefe (verschlüsselt) ----
+
+const KEY_ABSENDER = 'behoerdenklar_absender';
+
+/**
+ * Name und Anschrift des Nutzers. Genauso schützenswert wie die Briefe
+ * selbst, deshalb mit demselben Archiv-Schlüssel verschlüsselt und nicht
+ * als Klartext-Einstellung abgelegt.
+ */
+export async function holeAbsender(): Promise<Absender | null> {
+  const roh = await AsyncStorage.getItem(KEY_ABSENDER);
+  if (!roh) return null;
+  try {
+    return JSON.parse(await entschluesseleText(roh)) as Absender;
+  } catch {
+    return null;
+  }
+}
+
+export async function speichereAbsender(absender: Absender): Promise<void> {
+  const name = absender.name.trim();
+  const adresse = absender.adresse.trim();
+  if (!name && !adresse) {
+    await AsyncStorage.removeItem(KEY_ABSENDER);
+    return;
+  }
+  await AsyncStorage.setItem(
+    KEY_ABSENDER,
+    await verschluesseleText(JSON.stringify({ name, adresse }))
+  );
+}
+
 // ---- Sicherheits-Einstellungen ----
 
 const KEY_APP_SPERRE = 'behoerdenklar_app_sperre';
@@ -193,6 +225,7 @@ export async function loescheAlleDaten(): Promise<void> {
     KEY_BONUS,
     KEY_APP_SPERRE,
     KEY_AUTO_LOESCHEN,
+    KEY_ABSENDER,
   ]);
   await SecureStore.deleteItemAsync(KEY_API);
   // Archiv-Schlüssel zuletzt: danach wären Restdaten ohnehin unlesbar
