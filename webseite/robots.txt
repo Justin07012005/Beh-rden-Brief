@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://behoerdenklar.pages.dev/sitemap.xml
+Sitemap: https://behoerdenklar.de/sitemap.xml

@@ -62,7 +62,7 @@ function fehler(status: number, typ: string, meldung: string): Response {
 //  5. Globales Tagesbudget (harter Kosten-Deckel für den Betreiber)
 
 /** Nur die eigene Webseite darf den Demo-Endpunkt aufrufen (CORS). */
-const DEMO_ORIGIN_MUSTER = /^https:\/\/([a-z0-9-]+\.)?behoerdenklar\.pages\.dev$/;
+const DEMO_ORIGIN_MUSTER = /^https:\/\/([a-z0-9-]+\.)?behoerdenklar\.(de|pages\.dev)$/;
 
 /** ~5 MB Datei entsprechen ~6,7 Mio. Base64-Zeichen. */
 const DEMO_MAX_BASE64 = 7_000_000;
@@ -134,7 +134,7 @@ const DEMO_SCHEMA = {
 };
 
 function demoCorsHeaders(origin: string | null): Record<string, string> {
-  const erlaubt = origin && DEMO_ORIGIN_MUSTER.test(origin) ? origin : 'https://behoerdenklar.pages.dev';
+  const erlaubt = origin && DEMO_ORIGIN_MUSTER.test(origin) ? origin : 'https://behoerdenklar.de';
   return {
     'access-control-allow-origin': erlaubt,
     'access-control-allow-methods': 'POST, OPTIONS',
