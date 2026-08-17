@@ -28,6 +28,14 @@ interface Env {
   DEMO_TAGES_BUDGET: string;
   /** Web-Demo: max. Analysen pro IP innerhalb von 30 Tagen */
   DEMO_LIMIT_IP: string;
+  /** Bezahlung: `wrangler secret put STRIPE_SECRET_KEY` (Test: sk_test_…) */
+  STRIPE_SECRET_KEY: string;
+  /** Bezahlung: `wrangler secret put STRIPE_WEBHOOK_SECRET` (whsec_…) */
+  STRIPE_WEBHOOK_SECRET: string;
+  /** Bezahlung: `wrangler secret put TOKEN_SIGNING_SECRET` (langer Zufallswert) */
+  TOKEN_SIGNING_SECRET: string;
+  /** Bezahlung: `wrangler secret put BREVO_API_KEY` (für die Guthaben-Link-Mail) */
+  BREVO_API_KEY: string;
 }
 
 const ANTHROPIC_URL = 'https://api.anthropic.com/v1/messages';
@@ -167,7 +175,7 @@ async function demoHandler(request: Request, env: Env): Promise<Response> {
     return demoFehler(403, 'origin', 'Aufruf nur von der BehördenKlar-Webseite erlaubt.', origin);
   }
 
-  let body: { bild?: string; mimeType?: string; turnstileToken?: string; email?: string };
+  let body: { bild?: string; mimeType?: string; turnstileToken?: string; email?: string; walletToken?: string };
   try {
     body = await request.json();
   } catch {
@@ -176,6 +184,7 @@ async function demoHandler(request: Request, env: Env): Promise<Response> {
 
   const { bild, mimeType, turnstileToken } = body;
   const email = typeof body.email === 'string' ? body.email.trim().toLowerCase() : null;
+  const walletToken = typeof body.walletToken === 'string' ? body.walletToken : null;
 
   if (typeof bild !== 'string' || bild.length === 0 || bild.length > DEMO_MAX_BASE64) {
     return demoFehler(400, 'datei', 'Die Datei fehlt oder ist zu groß (max. 5 MB).', origin);
@@ -199,60 +208,77 @@ async function demoHandler(request: Request, env: Env): Promise<Response> {
     return demoFehler(403, 'turnstile', 'Sicherheitsprüfung fehlgeschlagen. Bitte Seite neu laden und erneut versuchen.', origin);
   }
 
-  // E-Mail prüfen (nur für die 2. Analyse nötig)
-  let mailKey: string | null = null;
-  if (email) {
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) {
-      return demoFehler(400, 'email', 'Bitte geben Sie eine gültige E-Mail-Adresse ein.', origin);
-    }
-    const domain = email.split('@')[1];
-    if (WEGWERF_DOMAINS.has(domain)) {
-      return demoFehler(400, 'email', 'Wegwerf-E-Mail-Adressen sind nicht möglich. Bitte nutzen Sie Ihre normale Adresse.', origin);
-    }
-    mailKey = `demo:mail:${await emailHash(email, env.TURNSTILE_SECRET_KEY)}`;
-  }
-
-  // Schichten 2-5: Limits lesen. IP- und Anon-Zähler sind bewusst TÄGLICH
-  // (Datum im Schlüssel): Ein Anschluss, den sich mehrere Menschen teilen
-  // (Familie, WLAN, Mobilfunk/CGNAT), darf pro Tag mehrere erste Analysen
-  // machen. Sonst würde der zweite Besucher an derselben Leitung sofort zur
-  // E-Mail gezwungen. Die eigentliche "2 pro Person"-Grenze setzt der
-  // Browser (localStorage) + der E-Mail-Hash; IP ist nur ein Missbrauchs-Damm.
   const heute = new Date().toISOString().slice(0, 10);
-  const tagKey = `demo:tag:${heute}`;
-  const ipKey = `demo:ip:${ip}:${heute}`;
-  const anonKey = `demo:anon:${ip}:${heute}`;
-  const budget = parseInt(env.DEMO_TAGES_BUDGET || '100', 10);
-  const ipLimit = parseInt(env.DEMO_LIMIT_IP || '8', 10);
-  // Wie viele anonyme (ohne E-Mail) Analysen ein Anschluss pro Tag darf,
-  // bevor eine E-Mail nötig wird — großzügig, damit geteilte Leitungen gehen.
-  const ANON_PRO_IP = 3;
 
-  const [tagWert, ipWert, anonWert, mailWert] = await Promise.all([
-    env.RATE_LIMIT.get(tagKey),
-    env.RATE_LIMIT.get(ipKey),
-    env.RATE_LIMIT.get(anonKey),
-    mailKey ? env.RATE_LIMIT.get(mailKey) : Promise.resolve(null),
-  ]);
-  const tagZahl = parseInt(tagWert ?? '0', 10);
-  const ipZahl = parseInt(ipWert ?? '0', 10);
-  const anonZahl = parseInt(anonWert ?? '0', 10);
+  // ── Bezahltes Guthaben? ──────────────────────────────────────────
+  // Ein gültiges Wallet-Token mit Guthaben umgeht die Gratis-Grenzen
+  // (die sind nur ein Kosten-Deckel für die kostenlose Stufe).
+  let walletId: string | null = null;
+  let walletRest = 0;
+  if (walletToken) {
+    walletId = await verifyWallet(walletToken, env.TOKEN_SIGNING_SECRET);
+    if (!walletId) {
+      return demoFehler(403, 'wallet_ungueltig', 'Ihr Zugangs-Token ist ungültig. Bitte laden Sie die Seite neu.', origin);
+    }
+    walletRest = parseInt((await env.RATE_LIMIT.get(`wallet:${walletId}`)) ?? '0', 10);
+    if (walletRest <= 0) {
+      return demoFehler(402, 'kein_guthaben', 'Ihr Guthaben ist aufgebraucht. Bitte kaufen Sie neues Guthaben.', origin);
+    }
+  }
+  const bezahlt = walletId !== null;
 
-  // Schicht 5: globales Tagesbudget (Kosten-Deckel)
-  if (tagZahl >= budget) {
-    return demoFehler(429, 'budget', 'Die Gratis-Demo ist für heute ausgebucht. Kommen Sie morgen wieder — oder tragen Sie sich in die Warteliste ein.', origin);
-  }
-  // Schicht 4: IP-Gesamtlimit pro Tag (Missbrauchs-Damm, großzügig)
-  if (ipZahl >= ipLimit) {
-    return demoFehler(429, 'aufgebraucht', 'Für heute wurden über diesen Anschluss viele Gratis-Analysen genutzt. Kommen Sie morgen wieder — oder holen Sie sich die App.', origin);
-  }
-  // Schicht 2/3: nach mehreren anonymen Analysen pro Anschluss E-Mail nötig;
-  // pro E-Mail dauerhaft nur 1x
-  if (!email && anonZahl >= ANON_PRO_IP) {
-    return demoFehler(403, 'email_noetig', 'Für weitere Gratis-Analysen über diesen Anschluss geben Sie bitte Ihre E-Mail-Adresse ein.', origin);
-  }
-  if (mailKey && mailWert !== null) {
-    return demoFehler(429, 'aufgebraucht', 'Mit dieser E-Mail-Adresse wurde die Gratis-Analyse schon genutzt. In der App gibt es 3 weitere gratis.', origin);
+  // Gratis-Stufe: Kontingent-Schlüssel (werden nur ohne Guthaben benutzt).
+  // IP-/Anon-Zähler sind TÄGLICH (Datum im Schlüssel), damit geteilte
+  // Anschlüsse (Familie, WLAN, Mobilfunk/CGNAT) nicht sofort blockieren.
+  let tagKey = '', ipKey = '', anonKey = '';
+  let mailKey: string | null = null;
+  let tagZahl = 0, ipZahl = 0, anonZahl = 0;
+
+  if (!bezahlt) {
+    // E-Mail prüfen (nur für die 2. Gratis-Analyse nötig)
+    if (email) {
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) {
+        return demoFehler(400, 'email', 'Bitte geben Sie eine gültige E-Mail-Adresse ein.', origin);
+      }
+      const domain = email.split('@')[1];
+      if (WEGWERF_DOMAINS.has(domain)) {
+        return demoFehler(400, 'email', 'Wegwerf-E-Mail-Adressen sind nicht möglich. Bitte nutzen Sie Ihre normale Adresse.', origin);
+      }
+      mailKey = `demo:mail:${await emailHash(email, env.TURNSTILE_SECRET_KEY)}`;
+    }
+
+    tagKey = `demo:tag:${heute}`;
+    ipKey = `demo:ip:${ip}:${heute}`;
+    anonKey = `demo:anon:${ip}:${heute}`;
+    const budget = parseInt(env.DEMO_TAGES_BUDGET || '100', 10);
+    const ipLimit = parseInt(env.DEMO_LIMIT_IP || '8', 10);
+    const ANON_PRO_IP = 3;
+
+    const [tagWert, ipWert, anonWert, mailWert] = await Promise.all([
+      env.RATE_LIMIT.get(tagKey),
+      env.RATE_LIMIT.get(ipKey),
+      env.RATE_LIMIT.get(anonKey),
+      mailKey ? env.RATE_LIMIT.get(mailKey) : Promise.resolve(null),
+    ]);
+    tagZahl = parseInt(tagWert ?? '0', 10);
+    ipZahl = parseInt(ipWert ?? '0', 10);
+    anonZahl = parseInt(anonWert ?? '0', 10);
+
+    // globales Tagesbudget (Kosten-Deckel der Gratis-Stufe)
+    if (tagZahl >= budget) {
+      return demoFehler(429, 'budget', 'Die Gratis-Demo ist für heute ausgebucht. Kommen Sie morgen wieder — oder kaufen Sie Guthaben.', origin);
+    }
+    // IP-Gesamtlimit pro Tag (Missbrauchs-Damm)
+    if (ipZahl >= ipLimit) {
+      return demoFehler(429, 'aufgebraucht', 'Für heute wurden über diesen Anschluss viele Gratis-Analysen genutzt. Kommen Sie morgen wieder — oder kaufen Sie Guthaben.', origin);
+    }
+    // nach mehreren anonymen Analysen E-Mail nötig; pro E-Mail dauerhaft 1x
+    if (!email && anonZahl >= ANON_PRO_IP) {
+      return demoFehler(403, 'email_noetig', 'Für weitere Gratis-Analysen über diesen Anschluss geben Sie bitte Ihre E-Mail-Adresse ein.', origin);
+    }
+    if (mailKey && mailWert !== null) {
+      return demoFehler(429, 'aufgebraucht', 'Mit dieser E-Mail-Adresse wurde die Gratis-Analyse schon genutzt. Bitte kaufen Sie Guthaben, um weiterzumachen.', origin);
+    }
   }
 
   // KI-Analyse — identischer Aufbau wie in der App
@@ -303,18 +329,23 @@ async function demoHandler(request: Request, env: Env): Promise<Response> {
   // Erst NACH erfolgreichem KI-Aufruf zählen (Fehler kosten kein Kontingent).
   // Tag-, IP- und Anon-Zähler laufen nach 48h ab (sie sind tagesbasiert).
   const TAG_TTL = 60 * 60 * 48;
-  const schreiben: Promise<void>[] = [
-    env.RATE_LIMIT.put(tagKey, String(tagZahl + 1), { expirationTtl: TAG_TTL }),
-    env.RATE_LIMIT.put(ipKey, String(ipZahl + 1), { expirationTtl: TAG_TTL }),
-  ];
-  if (!email) {
-    schreiben.push(env.RATE_LIMIT.put(anonKey, String(anonZahl + 1), { expirationTtl: TAG_TTL }));
+  if (bezahlt) {
+    // Bezahlte Analyse: Guthaben um 1 verringern (kein TTL — bleibt bestehen)
+    await env.RATE_LIMIT.put(`wallet:${walletId}`, String(walletRest - 1));
+  } else {
+    const schreiben: Promise<void>[] = [
+      env.RATE_LIMIT.put(tagKey, String(tagZahl + 1), { expirationTtl: TAG_TTL }),
+      env.RATE_LIMIT.put(ipKey, String(ipZahl + 1), { expirationTtl: TAG_TTL }),
+    ];
+    if (!email) {
+      schreiben.push(env.RATE_LIMIT.put(anonKey, String(anonZahl + 1), { expirationTtl: TAG_TTL }));
+    }
+    if (mailKey) {
+      // bewusst OHNE TTL: „pro E-Mail für immer nur 1" — es liegt nur der Hash
+      schreiben.push(env.RATE_LIMIT.put(mailKey, heute));
+    }
+    await Promise.all(schreiben);
   }
-  if (mailKey) {
-    // bewusst OHNE TTL: „pro E-Mail für immer nur 1" — es liegt nur der Hash
-    schreiben.push(env.RATE_LIMIT.put(mailKey, heute));
-  }
-  await Promise.all(schreiben);
 
   if (daten.stop_reason === 'refusal') {
     return demoFehler(422, 'inhalt', 'Die KI konnte diesen Inhalt nicht verarbeiten. Bitte prüfen Sie, ob das Foto wirklich einen Behördenbrief zeigt.', origin);
@@ -332,17 +363,204 @@ async function demoHandler(request: Request, env: Env): Promise<Response> {
   }
 
   return Response.json(
-    { analyse, versuch: email ? 2 : 1 },
+    {
+      analyse,
+      versuch: bezahlt ? 'bezahlt' : email ? 2 : 1,
+      guthaben: bezahlt ? walletRest - 1 : undefined,
+    },
     { headers: demoCorsHeaders(origin) }
   );
 }
 
+// ============================================================
+// Bezahlung (Stripe) — Credit-Guthaben, passwortlos ("Gutschein"-Prinzip)
+// ============================================================
+//
+// Ablauf:
+//  1. /kaufen        -> legt eine Stripe-Checkout-Session an, gibt URL zurück
+//  2. Stripe-Bezahlseite (Kartendaten fasst NUR Stripe an)
+//  3a. /kauf-status  -> nach Rückkehr: prüft Zahlung, aktiviert Guthaben,
+//                       gibt ein signiertes Wallet-Token zurück (localStorage)
+//  3b. /stripe-webhook -> Sicherungsnetz: aktiviert Guthaben + mailt den
+//                       Wiederherstellungs-Link (Brevo)
+//  4. /demo mit walletToken -> Analyse gegen Guthaben (siehe demoHandler)
+
+/** Credit-Pakete: Stripe-Price-ID -> Anzahl Analysen.
+ *  NACH dem Anlegen der Produkte in Stripe die echten `price_…`-IDs eintragen. */
+const PAKETE: Record<string, { credits: number }> = {
+  // TODO: echte Stripe-Price-IDs eintragen (Test- und/oder Live-IDs)
+  'price_PAKET_5': { credits: 5 },
+  'price_PAKET_15': { credits: 15 },
+};
+
+/** HMAC-SHA256 als Hex. */
+async function hmacHex(secret: string, data: string): Promise<string> {
+  const key = await crypto.subtle.importKey(
+    'raw',
+    new TextEncoder().encode(secret),
+    { name: 'HMAC', hash: 'SHA-256' },
+    false,
+    ['sign']
+  );
+  const sig = await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(data));
+  return [...new Uint8Array(sig)].map((b) => b.toString(16).padStart(2, '0')).join('');
+}
+
+/** Konstantzeit-Vergleich zweier Hex-Strings. */
+function gleich(a: string, b: string): boolean {
+  if (a.length !== b.length) return false;
+  let diff = 0;
+  for (let i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  return diff === 0;
+}
+
+/** Wallet-Token = `<walletId>.<HMAC>`. */
+async function signWallet(walletId: string, secret: string): Promise<string> {
+  return `${walletId}.${await hmacHex(secret, walletId)}`;
+}
+async function verifyWallet(token: string, secret: string): Promise<string | null> {
+  const i = token.lastIndexOf('.');
+  if (i < 0) return null;
+  const walletId = token.slice(0, i);
+  const sig = token.slice(i + 1);
+  return gleich(sig, await hmacHex(secret, walletId)) ? walletId : null;
+}
+
+/** Guthaben idempotent aktivieren (pro Stripe-Session nur einmal). */
+async function aktiviereGuthaben(env: Env, sessionId: string, walletId: string, credits: number): Promise<void> {
+  const flagKey = `wallet_done:${sessionId}`;
+  if (await env.RATE_LIMIT.get(flagKey)) return; // schon aktiviert
+  await env.RATE_LIMIT.put(`wallet:${walletId}`, String(credits));
+  await env.RATE_LIMIT.put(flagKey, '1', { expirationTtl: 60 * 60 * 24 * 400 });
+}
+
+/** Guthaben-/Wiederherstellungs-Link per Brevo-Transaktionsmail. */
+async function guthabenMail(env: Env, email: string, link: string, credits: number): Promise<void> {
+  await fetch('https://api.brevo.com/v3/smtp/email', {
+    method: 'POST',
+    headers: { 'api-key': env.BREVO_API_KEY, 'content-type': 'application/json', accept: 'application/json' },
+    body: JSON.stringify({
+      sender: { name: 'BehördenKlar', email: 'behoerdenbriefhelfer@gmail.com' },
+      to: [{ email }],
+      subject: 'Ihr BehördenKlar-Guthaben',
+      htmlContent:
+        `<p>Vielen Dank für Ihren Kauf!</p>` +
+        `<p>Ihr Guthaben: <strong>${credits} Analysen</strong>.</p>` +
+        `<p>Mit diesem Link nutzen Sie Ihr Guthaben auf jedem Gerät:</p>` +
+        `<p><a href="${link}">${link}</a></p>` +
+        `<p>Bitte bewahren Sie diese E-Mail auf — der Link ist Ihr Zugang.</p>`,
+    }),
+  });
+}
+
+/** POST /kaufen — Stripe-Checkout-Session anlegen. */
+async function kaufenHandler(request: Request, env: Env): Promise<Response> {
+  const origin = request.headers.get('origin');
+  if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers: demoCorsHeaders(origin) });
+  if (request.method !== 'POST') return demoFehler(405, 'methode', 'Nur POST erlaubt.', origin);
+  if (!origin || !DEMO_ORIGIN_MUSTER.test(origin)) return demoFehler(403, 'origin', 'Aufruf nur von der BehördenKlar-Webseite erlaubt.', origin);
+
+  let body: { priceId?: string };
+  try {
+    body = await request.json();
+  } catch {
+    return demoFehler(400, 'json', 'Ungültige Anfrage.', origin);
+  }
+  const priceId = typeof body.priceId === 'string' ? body.priceId : '';
+  const paket = PAKETE[priceId];
+  if (!paket) return demoFehler(400, 'paket', 'Unbekanntes Paket.', origin);
+
+  const walletId = crypto.randomUUID();
+  const params = new URLSearchParams();
+  params.set('mode', 'payment');
+  params.set('line_items[0][price]', priceId);
+  params.set('line_items[0][quantity]', '1');
+  params.set('success_url', `${origin}/demo?kauf=ok&session_id={CHECKOUT_SESSION_ID}`);
+  params.set('cancel_url', `${origin}/demo?kauf=abbruch`);
+  params.set('metadata[walletId]', walletId);
+  params.set('metadata[credits]', String(paket.credits));
+  params.set('metadata[origin]', origin);
+
+  const r = await fetch('https://api.stripe.com/v1/checkout/sessions', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${env.STRIPE_SECRET_KEY}`, 'content-type': 'application/x-www-form-urlencoded' },
+    body: params.toString(),
+  });
+  const s = (await r.json()) as { url?: string };
+  if (!r.ok || !s.url) {
+    console.log('Stripe-Checkout-Fehler', r.status, JSON.stringify(s).slice(0, 300));
+    return demoFehler(502, 'stripe', 'Die Bezahlseite konnte nicht geöffnet werden. Bitte später erneut versuchen.', origin);
+  }
+  return Response.json({ url: s.url }, { headers: demoCorsHeaders(origin) });
+}
+
+/** GET /kauf-status?session_id=… — nach Rückkehr: Zahlung prüfen, Guthaben aktivieren, Token liefern. */
+async function kaufStatusHandler(request: Request, env: Env): Promise<Response> {
+  const origin = request.headers.get('origin');
+  if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers: demoCorsHeaders(origin) });
+  if (!origin || !DEMO_ORIGIN_MUSTER.test(origin)) return demoFehler(403, 'origin', 'Nicht erlaubt.', origin);
+
+  const sessionId = new URL(request.url).searchParams.get('session_id') ?? '';
+  if (!/^cs_[A-Za-z0-9_]+$/.test(sessionId)) return demoFehler(400, 'session', 'Ungültige Sitzung.', origin);
+
+  const r = await fetch(`https://api.stripe.com/v1/checkout/sessions/${sessionId}`, {
+    headers: { Authorization: `Bearer ${env.STRIPE_SECRET_KEY}` },
+  });
+  const s = (await r.json()) as { payment_status?: string; metadata?: Record<string, string> };
+  if (!r.ok || s.payment_status !== 'paid') {
+    return demoFehler(402, 'nicht_bezahlt', 'Die Zahlung ist noch nicht bestätigt. Bitte einen Moment warten und neu laden.', origin);
+  }
+  const walletId = s.metadata?.walletId;
+  const credits = parseInt(s.metadata?.credits ?? '0', 10);
+  if (!walletId || !credits) return demoFehler(500, 'meta', 'Kaufdaten unvollständig.', origin);
+
+  await aktiviereGuthaben(env, sessionId, walletId, credits);
+  const token = await signWallet(walletId, env.TOKEN_SIGNING_SECRET);
+  const rest = parseInt((await env.RATE_LIMIT.get(`wallet:${walletId}`)) ?? '0', 10);
+  return Response.json({ token, guthaben: rest }, { headers: demoCorsHeaders(origin) });
+}
+
+/** POST /stripe-webhook — Sicherungsnetz: Signatur prüfen, Guthaben aktivieren, Link mailen. */
+async function webhookHandler(request: Request, env: Env): Promise<Response> {
+  if (request.method !== 'POST') return new Response('nur POST', { status: 405 });
+  const sigHeader = request.headers.get('stripe-signature') ?? '';
+  const payload = await request.text();
+  const teile = Object.fromEntries(sigHeader.split(',').map((p) => p.split('=') as [string, string]));
+  const t = teile['t'];
+  const v1 = teile['v1'];
+  if (!t || !v1) return new Response('Signatur fehlt', { status: 400 });
+  const erwartet = await hmacHex(env.STRIPE_WEBHOOK_SECRET, `${t}.${payload}`);
+  if (!gleich(v1, erwartet)) return new Response('Signatur ungültig', { status: 400 });
+
+  const event = JSON.parse(payload) as {
+    type?: string;
+    data?: { object?: { id?: string; metadata?: Record<string, string>; customer_details?: { email?: string } } };
+  };
+  if (event.type === 'checkout.session.completed') {
+    const o = event.data?.object;
+    const walletId = o?.metadata?.walletId;
+    const credits = parseInt(o?.metadata?.credits ?? '0', 10);
+    if (o?.id && walletId && credits) {
+      await aktiviereGuthaben(env, o.id, walletId, credits);
+      const email = o.customer_details?.email;
+      const basis = o.metadata?.origin || 'https://behoerdenklar.de';
+      if (email) {
+        const token = await signWallet(walletId, env.TOKEN_SIGNING_SECRET);
+        await guthabenMail(env, email, `${basis}/demo?wallet=${encodeURIComponent(token)}`, credits).catch(() => {});
+      }
+    }
+  }
+  return new Response('ok', { status: 200 });
+}
+
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
-    // Web-Demo hat einen eigenen Pfad mit eigenen Regeln
-    if (new URL(request.url).pathname === '/demo') {
-      return demoHandler(request, env);
-    }
+    const pfad = new URL(request.url).pathname;
+    // Web-Demo + Bezahl-Routen haben eigene Regeln
+    if (pfad === '/demo') return demoHandler(request, env);
+    if (pfad === '/kaufen') return kaufenHandler(request, env);
+    if (pfad === '/kauf-status') return kaufStatusHandler(request, env);
+    if (pfad === '/stripe-webhook') return webhookHandler(request, env);
 
     if (request.method !== 'POST') {
       return fehler(405, 'invalid_request_error', 'Nur POST erlaubt.');
