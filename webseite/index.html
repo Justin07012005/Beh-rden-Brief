@@ -382,7 +382,8 @@
       </p>
       <div class="hero-fuss">
         <a class="cta" href="demo.html">📷 Brief testen — 2× gratis</a>
-        <a class="cta cta-sek" href="#anmelden">✉️ Auf die Warteliste</a>
+        <a class="cta cta-sek" href="#kaufen">💳 Guthaben kaufen</a>
+        <a class="cta cta-sek" href="#anmelden">✉️ Warteliste</a>
       </div>
       <p class="hero-unter">
         <strong>Testen:</strong> mit Ihrem eigenen Brief, kein Konto, sofort im Browser.<br>
@@ -390,6 +391,36 @@
       </p>
       <p style="margin-top: 16px;"><span class="stempel">Bald im App&nbsp;Store</span></p>
     </header>
+
+    <section id="kaufen">
+      <div class="antrag" style="border: 2px solid var(--amtsblau, #1d4e89);">
+        <p class="formular-kopf">Sofort nutzen · ohne App Store · ohne Konto</p>
+        <h3 style="font-size: 26px; line-height: 1.25; margin-bottom: 6px;">Guthaben kaufen und direkt loslegen</h3>
+        <p style="margin-top: 10px;">
+          Sie müssen nicht warten: Kaufen Sie Guthaben und lassen Sie Ihre Briefe
+          sofort hier im Browser erklären — auf jedem Gerät. Ihr Guthaben bleibt
+          gespeichert und verfällt nicht.
+        </p>
+
+        <div id="hpPaketListe" style="display: flex; flex-direction: column; gap: 12px; margin-top: 18px;"></div>
+
+        <label style="display: flex; gap: 10px; align-items: flex-start; margin-top: 18px; font-size: 14px; line-height: 1.5; cursor: pointer;">
+          <input type="checkbox" id="hpKaufKonsens" style="margin-top: 3px; flex-shrink: 0;">
+          <span>
+            Ich verlange ausdrücklich, dass die Analysen sofort nach dem Kauf zur
+            Verfügung stehen. Mir ist bekannt, dass mein Widerrufsrecht mit der
+            vollständigen Erbringung erlischt.
+          </span>
+        </label>
+
+        <p id="hpKaufFehler" style="display: none; margin-top: 12px; color: #b3261e; font-size: 14px; font-weight: 600;"></p>
+
+        <p class="klein" style="margin-top: 12px;">
+          🔒 Sichere Bezahlung über Stripe — wir sehen Ihre Kartendaten nie.
+          Preise inkl. gesetzl. USt. · <a href="demo.html">Lieber erst 2× kostenlos testen →</a>
+        </p>
+      </div>
+    </section>
 
     <section>
       <h2><span class="nr">§ 1</span> Vorher und Nachher</h2>
@@ -569,6 +600,64 @@
 
   </div>
   <!-- Cloudflare Web Analytics: cookielose Reichweitenmessung, keine Nutzer-Profile -->
+  <script>
+  // Guthaben-Kauf direkt von der Startseite (Rückkehr/Aktivierung läuft auf /demo).
+  (function () {
+    'use strict';
+    var BASIS = 'https://behoerdenklar-proxy.behoerdenbrief.workers.dev';
+    var PAKETE = [
+      { priceId: 'price_1U5Q7RBsRA1AOdneaik2HGkA', titel: '5 Analysen', preis: '2,99 €' },
+      { priceId: 'price_1U5Q83BsRA1AOdneNIqu1vQL', titel: '15 Analysen', preis: '6,99 €', best: true },
+    ];
+    var liste = document.getElementById('hpPaketListe');
+    var konsens = document.getElementById('hpKaufKonsens');
+    var fehler = document.getElementById('hpKaufFehler');
+    if (!liste) return;
+    konsens.addEventListener('change', function () { if (konsens.checked) fehler.style.display = 'none'; });
+    PAKETE.forEach(function (p) {
+      var b = document.createElement('button');
+      b.className = 'cta';
+      b.type = 'button';
+      b.style.width = '100%';
+      b.style.display = 'flex';
+      b.style.justifyContent = 'space-between';
+      b.style.alignItems = 'center';
+      var l = document.createElement('span');
+      l.textContent = (p.best ? '⭐ ' : '') + p.titel;
+      var r = document.createElement('strong');
+      r.textContent = p.preis;
+      b.appendChild(l);
+      b.appendChild(r);
+      b.addEventListener('click', function () { starte(p.priceId, b); });
+      liste.appendChild(b);
+    });
+    function starte(priceId, knopf) {
+      if (!konsens.checked) {
+        fehler.style.display = 'block';
+        fehler.textContent = 'Bitte bestätigen Sie zuerst das Häkchen, um fortzufahren.';
+        konsens.focus();
+        return;
+      }
+      fehler.style.display = 'none';
+      var alt = knopf.innerHTML;
+      knopf.disabled = true;
+      knopf.textContent = 'Weiter zu Stripe …';
+      fetch(BASIS + '/kaufen', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ priceId: priceId }),
+      })
+        .then(function (r) { return r.json(); })
+        .then(function (d) { if (d && d.url) { window.location.href = d.url; return; } throw new Error('keine url'); })
+        .catch(function () {
+          knopf.disabled = false;
+          knopf.innerHTML = alt;
+          fehler.style.display = 'block';
+          fehler.textContent = 'Die Bezahlseite konnte nicht geöffnet werden. Bitte erneut versuchen.';
+        });
+    }
+  })();
+  </script>
   <script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "11f017e9a707466b9151921db6125dde"}'></script>
 </body>
 </html>
