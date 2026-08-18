@@ -345,11 +345,12 @@
     <section id="kaufBlock" style="display: none;">
       <h2><span class="nr">§ 3</span> Guthaben kaufen &amp; weiter nutzen</h2>
       <div class="antrag">
-        <p class="formular-kopf">Weiter im Browser · ohne App Store</p>
-        <h3 style="font-size: 24px; line-height: 1.3;">Mehr Briefe erklären lassen</h3>
+        <p class="formular-kopf">Im Browser nutzen · ohne App Store</p>
+        <h3 style="font-size: 24px; line-height: 1.3;">Guthaben kaufen — sofort loslegen</h3>
         <p style="margin-top: 10px;">
-          Kaufen Sie Guthaben und nutzen Sie BehördenKlar direkt hier im Browser
-          weiter — auf jedem Gerät, ohne App. Ihr Guthaben bleibt gespeichert.
+          Sie müssen nicht erst testen: Kaufen Sie direkt Guthaben und nutzen Sie
+          BehördenKlar hier im Browser — auf jedem Gerät, ohne App. Ihr Guthaben
+          bleibt gespeichert und verfällt nicht.
         </p>
 
         <div id="paketListe" style="display: flex; flex-direction: column; gap: 12px; margin-top: 18px;"></div>
@@ -473,12 +474,13 @@
         return;
       }
       guthabenBanner.style.display = 'none';
-      // 2. Versuch: E-Mail-Feld einblenden; alles verbraucht: Kauf anbieten
+      // Kauf ist IMMER möglich — auch sofort, ohne die Gratis-Analysen zu nutzen.
+      kaufBlock.style.display = 'block';
+      // 2. Versuch: E-Mail-Feld einblenden; alles verbraucht: Gratis-Weg sperren
       if (benutzt() >= 2) {
         eingabe.style.display = 'none';
         fehlerBox.style.display = 'block';
         fehlerBox.innerHTML = 'Ihre 2 Gratis-Analysen sind verbraucht. Kaufen Sie unten <strong>Guthaben</strong>, um hier direkt weiterzumachen — oder tragen Sie sich für die App ein.';
-        kaufBlock.style.display = 'block';
         werbung.style.display = 'block';
       } else if (benutzt() === 1) {
         emailTeil.style.display = 'block';
