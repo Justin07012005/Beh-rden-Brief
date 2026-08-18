@@ -260,6 +260,12 @@
         <p class="formular-kopf">Antrag auf Klartext · 2 Gratis-Analysen</p>
 
         <div id="eingabe">
+          <p id="kaufOk" style="display: none; background: #e7f4ea; border: 1px solid #b7dfc1; color: #1a7f37; padding: 12px 14px; border-radius: 8px; margin-bottom: 14px; font-weight: 600;">
+            ✅ Kauf erfolgreich! Ihr Guthaben wurde aktiviert.
+          </p>
+          <p id="guthabenBanner" class="bonus-zeile" style="display: none;">
+            💳 Ihr Guthaben: <strong id="guthabenZahl">0</strong> Analysen — laden Sie den nächsten Brief hoch.
+          </p>
           <label class="konsens">
             <input type="checkbox" id="konsens">
             <span>
@@ -336,8 +342,38 @@
       </p>
     </section>
 
+    <section id="kaufBlock" style="display: none;">
+      <h2><span class="nr">§ 3</span> Guthaben kaufen &amp; weiter nutzen</h2>
+      <div class="antrag">
+        <p class="formular-kopf">Weiter im Browser · ohne App Store</p>
+        <h3 style="font-size: 24px; line-height: 1.3;">Mehr Briefe erklären lassen</h3>
+        <p style="margin-top: 10px;">
+          Kaufen Sie Guthaben und nutzen Sie BehördenKlar direkt hier im Browser
+          weiter — auf jedem Gerät, ohne App. Ihr Guthaben bleibt gespeichert.
+        </p>
+
+        <div id="paketListe" style="display: flex; flex-direction: column; gap: 12px; margin-top: 18px;"></div>
+
+        <label class="konsens" style="margin-top: 18px;">
+          <input type="checkbox" id="kaufKonsens">
+          <span>
+            Ich verlange ausdrücklich, dass die Analysen sofort nach dem Kauf zur
+            Verfügung stehen. Mir ist bekannt, dass mein Widerrufsrecht mit der
+            vollständigen Erbringung erlischt.
+          </span>
+        </label>
+
+        <div class="fehlerbox" id="kaufFehler" style="display: none; margin-top: 12px;"></div>
+
+        <p class="klein" style="margin-top: 12px;">
+          🔒 Sichere Bezahlung über Stripe — wir sehen Ihre Kartendaten nie.
+          Preise inkl. gesetzl. USt. Guthaben verfällt nicht.
+        </p>
+      </div>
+    </section>
+
     <section id="werbung" style="display: none;">
-      <h2><span class="nr">§ 3</span> Wie geht es weiter?</h2>
+      <h2><span class="nr">§ 4</span> Wie geht es weiter?</h2>
       <div class="antrag">
         <p class="formular-kopf" id="restZeile">Warteliste</p>
         <h3 id="wlTitel" style="font-size: 24px; line-height: 1.3;">Das hat Ihnen geholfen?</h3>
@@ -381,8 +417,17 @@
   <script>
   (function () {
     'use strict';
-    var ENDPUNKT = 'https://behoerdenklar-proxy.behoerdenbrief.workers.dev/demo';
+    var BASIS = 'https://behoerdenklar-proxy.behoerdenbrief.workers.dev';
+    var ENDPUNKT = BASIS + '/demo';
+    var KAUFEN_ENDPUNKT = BASIS + '/kaufen';
+    var STATUS_ENDPUNKT = BASIS + '/kauf-status';
     var MAX_KANTE = 2000; // wie in der App: reicht für A4, spart Datenvolumen
+
+    // Guthaben-Pakete (Stripe TEST-Preise). Für Live später die Live-price_…-IDs.
+    var PAKETE = [
+      { priceId: 'price_1U5Q7RBsRA1AOdneaik2HGkA', titel: '5 Analysen', preis: '2,99 €' },
+      { priceId: 'price_1U5Q83BsRA1AOdneNIqu1vQL', titel: '15 Analysen', preis: '6,99 €', best: true },
+    ];
 
     var konsens = document.getElementById('konsens');
     var startKnopf = document.getElementById('startKnopf');
@@ -392,6 +437,23 @@
     var status = document.getElementById('status');
     var eingabe = document.getElementById('eingabe');
     var fehlerBox = document.getElementById('fehler');
+    var kaufBlock = document.getElementById('kaufBlock');
+    var werbung = document.getElementById('werbung');
+    var guthabenBanner = document.getElementById('guthabenBanner');
+    var guthabenZahl = document.getElementById('guthabenZahl');
+    var kaufOk = document.getElementById('kaufOk');
+    var paketListe = document.getElementById('paketListe');
+    var kaufKonsens = document.getElementById('kaufKonsens');
+    var kaufFehler = document.getElementById('kaufFehler');
+
+    // Wallet (passwortloses Guthaben) — Token + zuletzt bekannter Stand lokal.
+    var WALLET_SCHLUESSEL = 'bk_wallet';
+    var GUTHABEN_SCHLUESSEL = 'bk_guthaben';
+    function walletToken() { return localStorage.getItem(WALLET_SCHLUESSEL) || ''; }
+    function setzeWallet(t) { localStorage.setItem(WALLET_SCHLUESSEL, t); }
+    function guthaben() { return parseInt(localStorage.getItem(GUTHABEN_SCHLUESSEL) || '0', 10); }
+    function setzeGuthaben(n) { localStorage.setItem(GUTHABEN_SCHLUESSEL, String(Math.max(0, n | 0))); }
+    function hatGuthaben() { return !!walletToken() && guthaben() > 0; }
 
     // Schlüsselname bewusst 'v2': setzt evtl. falsch gezählte Stände (aus der
     // Testphase) bei bestehenden Besuchern automatisch einmalig zurück.
@@ -400,12 +462,24 @@
     function setzeBenutzt(n) { localStorage.setItem(SPEICHER_SCHLUESSEL, String(n)); }
 
     function zeigeStand() {
-      // 2. Versuch: E-Mail-Feld einblenden; alles verbraucht: Eingabe sperren
+      // Bezahlter Modus: Eingabe offen, Guthaben-Stand zeigen, Gratis-Sperre egal
+      if (hatGuthaben()) {
+        eingabe.style.display = 'block';
+        guthabenBanner.style.display = 'block';
+        guthabenZahl.textContent = guthaben();
+        emailTeil.style.display = 'none';
+        fehlerBox.style.display = 'none';
+        kaufBlock.style.display = 'none';
+        return;
+      }
+      guthabenBanner.style.display = 'none';
+      // 2. Versuch: E-Mail-Feld einblenden; alles verbraucht: Kauf anbieten
       if (benutzt() >= 2) {
         eingabe.style.display = 'none';
         fehlerBox.style.display = 'block';
-        fehlerBox.innerHTML = 'Ihre 2 Gratis-Analysen sind verbraucht. 🎁 In der <strong>App</strong> gibt es 3 weitere gratis — mit Warteliste sogar 5. Tragen Sie sich unten ein!';
-        document.getElementById('werbung').style.display = 'block';
+        fehlerBox.innerHTML = 'Ihre 2 Gratis-Analysen sind verbraucht. Kaufen Sie unten <strong>Guthaben</strong>, um hier direkt weiterzumachen — oder tragen Sie sich für die App ein.';
+        kaufBlock.style.display = 'block';
+        werbung.style.display = 'block';
       } else if (benutzt() === 1) {
         emailTeil.style.display = 'block';
       }
@@ -414,7 +488,7 @@
     konsens.addEventListener('change', function () { startKnopf.disabled = !konsens.checked; });
     startKnopf.addEventListener('click', function () {
       fehlerBox.style.display = 'none';
-      if (benutzt() >= 1 && !emailFeld.value.trim()) {
+      if (!hatGuthaben() && benutzt() >= 1 && !emailFeld.value.trim()) {
         emailTeil.style.display = 'block';
         emailFeld.focus();
         zeigeFehler('Bitte geben Sie zuerst Ihre E-Mail-Adresse ein — dann wählen Sie den Brief aus.');
@@ -477,18 +551,21 @@
       }
 
       eingabe.style.display = 'none';
+      status.querySelector('.gross').textContent = 'Ihr Brief wird analysiert…';
       status.style.display = 'block';
 
       try {
         var istPdf = datei.type === 'application/pdf';
         var base64 = istPdf ? await pdfAlsBase64(datei) : await bildVerkleinern(datei);
+        var bezahlt = hatGuthaben();
         var body = {
           bild: base64,
           mimeType: istPdf ? 'application/pdf' : 'image/jpeg',
           turnstileToken: token,
         };
         var email = emailFeld.value.trim();
-        if (benutzt() >= 1 && email) body.email = email;
+        if (bezahlt) body.walletToken = walletToken();
+        else if (benutzt() >= 1 && email) body.email = email;
 
         var antwort = await fetch(ENDPUNKT, {
           method: 'POST',
@@ -514,14 +591,28 @@
             zeigeStand();
             return;
           }
+          if (daten.code === 'kein_guthaben') {
+            setzeGuthaben(0);
+            guthabenBanner.style.display = 'none';
+            kaufBlock.style.display = 'block';
+            kaufBlock.scrollIntoView({ behavior: 'smooth' });
+            return;
+          }
           zeigeFehler(daten.meldung || 'Etwas ist schiefgelaufen. Bitte erneut versuchen.');
+          return;
+        }
+
+        // Token erneuern — sonst würde die nächste Analyse ein "Seite neu laden" verlangen
+        if (window.turnstile) window.turnstile.reset();
+
+        if (daten.versuch === 'bezahlt' || typeof daten.guthaben === 'number') {
+          setzeGuthaben(daten.guthaben);
+          zeigeErgebnis(daten.analyse, null, daten.guthaben);
           return;
         }
 
         setzeBenutzt(Math.max(benutzt(), daten.versuch));
         if (email) document.getElementById('wlEmail').value = email;
-        // Token erneuern — sonst würde die 2. Analyse ein "Seite neu laden" verlangen
-        if (window.turnstile) window.turnstile.reset();
         zeigeErgebnis(daten.analyse, daten.versuch);
       } catch (e) {
         status.style.display = 'none';
@@ -548,7 +639,7 @@
       return { farbe: farbe, text: punkt + ' ' + text };
     }
 
-    function zeigeErgebnis(analyse, versuch) {
+    function zeigeErgebnis(analyse, versuch, guthabenRest) {
       status.style.display = 'none';
       document.getElementById('ergBrieftyp').textContent = analyse.brieftyp || 'Ihr Brief';
       document.getElementById('ergKern').textContent = analyse.kernaussage || '';
@@ -586,6 +677,26 @@
       }
 
       document.getElementById('ergebnis').style.display = 'block';
+
+      // Bezahlter Modus: Guthaben-Stand zeigen, Eingabe für den nächsten Brief öffnen
+      if (typeof guthabenRest === 'number') {
+        werbung.style.display = 'none';
+        kaufOk.style.display = 'none';
+        if (guthabenRest > 0) {
+          eingabe.style.display = 'block';
+          guthabenBanner.style.display = 'block';
+          guthabenZahl.textContent = guthabenRest;
+          emailTeil.style.display = 'none';
+          kaufBlock.style.display = 'none';
+        } else {
+          eingabe.style.display = 'none';
+          guthabenBanner.style.display = 'none';
+          kaufBlock.style.display = 'block';
+        }
+        document.getElementById('ergebnis').scrollIntoView({ behavior: 'smooth' });
+        return;
+      }
+
       var rest = 2 - benutzt();
       document.getElementById('restZeile').textContent =
         rest > 0 ? 'Noch ' + rest + ' Gratis-Analyse übrig' : 'Ihre 2 Gratis-Analysen sind verbraucht';
@@ -601,6 +712,115 @@
       document.getElementById('ergebnis').scrollIntoView({ behavior: 'smooth' });
     }
 
+    // ---- Guthaben kaufen ------------------------------------------------
+    function rendrePakete() {
+      paketListe.innerHTML = '';
+      PAKETE.forEach(function (p) {
+        var b = document.createElement('button');
+        b.className = 'cta';
+        b.type = 'button';
+        b.style.width = '100%';
+        b.style.display = 'flex';
+        b.style.justifyContent = 'space-between';
+        b.style.alignItems = 'center';
+        var links = document.createElement('span');
+        links.textContent = (p.best ? '⭐ ' : '') + p.titel;
+        var rechts = document.createElement('strong');
+        rechts.textContent = p.preis;
+        b.appendChild(links);
+        b.appendChild(rechts);
+        b.addEventListener('click', function () { starteKauf(p.priceId, b); });
+        paketListe.appendChild(b);
+      });
+    }
+
+    function starteKauf(priceId, knopf) {
+      if (!kaufKonsens.checked) {
+        kaufFehler.style.display = 'block';
+        kaufFehler.textContent = 'Bitte bestätigen Sie zuerst das Häkchen, um fortzufahren.';
+        kaufKonsens.focus();
+        return;
+      }
+      kaufFehler.style.display = 'none';
+      var alt = knopf.innerHTML;
+      knopf.disabled = true;
+      knopf.textContent = 'Weiter zu Stripe …';
+      fetch(KAUFEN_ENDPUNKT, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ priceId: priceId }),
+      })
+        .then(function (r) { return r.json(); })
+        .then(function (d) {
+          if (d && d.url) { window.location.href = d.url; return; }
+          throw new Error('keine url');
+        })
+        .catch(function () {
+          knopf.disabled = false;
+          knopf.innerHTML = alt;
+          kaufFehler.style.display = 'block';
+          kaufFehler.textContent = 'Die Bezahlseite konnte nicht geöffnet werden. Bitte erneut versuchen.';
+        });
+    }
+
+    // ---- Rückkehr von Stripe / Wallet-Wiederherstellung -----------------
+    function reinigeUrl() {
+      if (window.history.replaceState) {
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
+    }
+
+    function holeKaufStatus(sid, n) {
+      fetch(STATUS_ENDPUNKT + '?session_id=' + encodeURIComponent(sid))
+        .then(function (r) { return r.json().then(function (d) { return { ok: r.ok, d: d }; }); })
+        .then(function (res) {
+          if (res.ok && res.d && res.d.token) {
+            setzeWallet(res.d.token);
+            setzeGuthaben(res.d.guthaben);
+            status.style.display = 'none';
+            kaufOk.style.display = 'block';
+            zeigeStand();
+            document.getElementById('demo').scrollIntoView({ behavior: 'smooth' });
+            return;
+          }
+          if (n < 4) { setTimeout(function () { holeKaufStatus(sid, n + 1); }, 1500); return; }
+          status.style.display = 'none';
+          zeigeFehler('Ihre Zahlung wird noch bestätigt. Bitte laden Sie die Seite in einer Minute neu.');
+        })
+        .catch(function () {
+          status.style.display = 'none';
+          zeigeFehler('Die Zahlungsbestätigung konnte nicht geladen werden. Bitte Seite neu laden.');
+        });
+    }
+
+    function pruefeRueckkehr() {
+      var p = new URLSearchParams(window.location.search);
+      var w = p.get('wallet');
+      if (w) { setzeWallet(w); setzeGuthaben(Math.max(guthaben(), 1)); reinigeUrl(); return; }
+      var kauf = p.get('kauf');
+      if (kauf === 'abbruch') {
+        reinigeUrl();
+        fehlerBox.style.display = 'block';
+        fehlerBox.textContent = 'Kauf abgebrochen — es wurde nichts berechnet.';
+        return;
+      }
+      if (kauf === 'ok') {
+        var sid = p.get('session_id');
+        reinigeUrl();
+        if (!sid) return;
+        status.querySelector('.gross').textContent = 'Ihr Kauf wird bestätigt …';
+        eingabe.style.display = 'none';
+        status.style.display = 'block';
+        holeKaufStatus(sid, 0);
+      }
+    }
+
+    kaufKonsens.addEventListener('change', function () {
+      if (kaufKonsens.checked) kaufFehler.style.display = 'none';
+    });
+
+    rendrePakete();
+    pruefeRueckkehr();
     zeigeStand();
   })();
   </script>

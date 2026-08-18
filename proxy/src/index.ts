@@ -388,9 +388,9 @@ async function demoHandler(request: Request, env: Env): Promise<Response> {
 /** Credit-Pakete: Stripe-Price-ID -> Anzahl Analysen.
  *  NACH dem Anlegen der Produkte in Stripe die echten `price_…`-IDs eintragen. */
 const PAKETE: Record<string, { credits: number }> = {
-  // TODO: echte Stripe-Price-IDs eintragen (Test- und/oder Live-IDs)
-  'price_PAKET_5': { credits: 5 },
-  'price_PAKET_15': { credits: 15 },
+  // Stripe TEST-Preise (Webklar-Sandbox). Für Live später die Live-price_…-IDs.
+  'price_1U5Q7RBsRA1AOdneaik2HGkA': { credits: 5 }, // 2,99 € — 5 Analysen
+  'price_1U5Q83BsRA1AOdneNIqu1vQL': { credits: 15 }, // 6,99 € — 15 Analysen
 };
 
 /** HMAC-SHA256 als Hex. */
